@@ -319,6 +319,18 @@ body:not(.showstrong) .strong{display:none}
 .ley-badge{font-size:9px; background:rgba(229,163,160,.2); color:#e2a3a0; border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
 .ley-dbadge{font-size:9px; background:rgba(255,255,255,.08); color:var(--board-soft); border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
 #leyFilter{width:100%}
+.ref-all{font-size:10.5px; color:var(--brass); background:transparent; border:1px solid var(--brass); border-radius:5px; padding:2px 7px; cursor:pointer; font-weight:600}
+.ref-all:hover{background:var(--brass); color:var(--board)}
+/* Cuadro de citas (modal, fondo claro) */
+.leyref-top{font-size:14px; line-height:1.5; color:var(--ink); border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:10px; font-weight:600}
+.leyref-top.jesus{color:var(--rubric)}
+.leyref-group{margin-bottom:12px}
+.leyref-h{font-family:var(--mono); font-size:12px; color:#3d6ea5; font-weight:600; margin-bottom:3px; border-bottom:1px dotted var(--line); padding-bottom:2px}
+.leyref-h:hover{color:var(--rubric)}
+.leyref-v{font-family:var(--serif); font-size:14px; line-height:1.55; color:var(--ink); padding:4px 0 4px 10px; border-left:2px solid var(--line-2); margin:3px 0}
+.leyref-v:hover{background:var(--sel)}
+.leyref-v .rvn{font-family:var(--mono); font-size:11px; color:var(--brass); margin-right:5px}
+.leyref-na{font-size:12px; color:var(--sand); font-style:italic; padding-left:10px}
 .pill.strong-pill{background:#3d6ea5; color:#fff; font-size:10px; padding:1px 6px; border-radius:20px; vertical-align:middle}
 
 /* Análisis mejorado */
@@ -1368,6 +1380,7 @@ function renderLey(d, filter){
         '</span></div>'+
         '<div class="ley-refs">'+
           it.refs.map(function(r){return '<button class="ref-chip" data-b="'+r.b+'" data-c="'+r.c+'" data-v="'+r.v+'">'+escAttr(r.t)+'</button>';}).join('')+
+          (it.refs.length?('<button class="ref-all" data-n="'+it.n+'" title="Leer todas las citas con su texto">◇ Ver todas</button>'):'')+
         '</div>'+
       '</div>';
     });
@@ -1379,11 +1392,56 @@ function renderLey(d, filter){
   $all('.ref-chip',host).forEach(function(b){b.onclick=function(){
     goToRef(+b.getAttribute('data-b'), +b.getAttribute('data-c'), +b.getAttribute('data-v'));
   };});
+  $all('.ref-all',host).forEach(function(b){b.onclick=function(){ openLeyRefs(+b.getAttribute('data-n')); };});
 }
 function goToRef(b,c,v){
   if(!VER[PRIMARY]||!VER[PRIMARY].bimap||!VER[PRIMARY].bimap[b]){ toast('Ese libro no está en la versión activa'); return; }
   goTo(b,c,v);
   closeNavMobile();
+}
+function leyItemByN(n){
+  if(!LEY)return null;
+  for(var i=0;i<LEY.sections.length;i++){var its=LEY.sections[i].items;
+    for(var j=0;j<its.length;j++)if(its[j].n===n)return its[j];}
+  return null;
+}
+// Expande "22:37-38" o "11:4-6,13" o "2:7,11" a una lista de {c,v} (mismo capítulo).
+function expandRef(r){
+  var mm=String(r.t).match(/(\d+)\s*:\s*([\d,\-\u2013\u2014]+)/);
+  if(mm){
+    var c=+mm[1], spec=mm[2].replace(/[\u2013\u2014]/g,'-'), vs=[];
+    spec.split(',').forEach(function(seg){
+      var mr=seg.match(/^(\d+)-(\d+)$/);
+      if(mr){ for(var i=+mr[1]; i<=+mr[2] && vs.length<20; i++) vs.push(i); }
+      else { var x=parseInt(seg,10); if(!isNaN(x)) vs.push(x); }
+    });
+    if(vs.length) return vs.map(function(v){return {c:c,v:v};});
+  }
+  return [{c:r.c, v:r.v}];
+}
+function openLeyRefs(n){
+  var it=leyItemByN(n); if(!it)return;
+  if(!VER[PRIMARY]||!VER[PRIMARY].bimap){ toast('Carga una versión primero'); return; }
+  var html='<div class="leyref-top'+(it.jesus?' jesus':'')+'">'+it.n+'. '+escAttr(it.text)+'</div>';
+  it.refs.forEach(function(r){
+    var pares=expandRef(r);
+    html+='<div class="leyref-group"><div class="leyref-h" data-b="'+r.b+'" data-c="'+pares[0].c+'" data-v="'+pares[0].v+'">'+escAttr(r.t)+'</div>';
+    var any=false;
+    pares.forEach(function(p){
+      var raw=getVerseRaw(PRIMARY,r.b,p.c,p.v);
+      if(raw==null) return;
+      any=true;
+      html+='<div class="leyref-v" data-b="'+r.b+'" data-c="'+p.c+'" data-v="'+p.v+'"><span class="rvn">'+p.c+':'+p.v+'</span> '+escAttr(RTF.plain(raw))+'</div>';
+    });
+    if(!any) html+='<div class="leyref-na">No está en la versión activa ('+escAttr(VER[PRIMARY].abbr||PRIMARY)+').</div>';
+    html+='</div>';
+  });
+  openModal('Citas del mandamiento', html, null, function(){
+    $all('.leyref-v, .leyref-h', $('#modal')).forEach(function(el){
+      el.style.cursor='pointer';
+      el.onclick=function(){ closeModal(); goToRef(+el.getAttribute('data-b'), +el.getAttribute('data-c'), +el.getAttribute('data-v')); };
+    });
+  });
 }
 
 /* ======================= Strong: léxico + morfología + cuadro ======================= */

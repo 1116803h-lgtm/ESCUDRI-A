@@ -5,7 +5,7 @@
      primera vez que se usa (cache-first con respaldo de red).
    Así la app funciona sin conexión tras la primera visita, sin
      forzar la descarga de archivos grandes al instalar.               */
-var CACHE = 'escudrinad-v4';
+var CACHE = 'escudrinad-v7';
 var CORE = [
   './',
   'index.html',
@@ -13,7 +13,8 @@ var CORE = [
   'icon-192.png',
   'icon-512.png',
   'apple-touch-icon.png',
-  'favicon-32.png'
+  'favicon-32.png',
+  'data/ley_cristo.json'
 ];
 
 self.addEventListener('install', function (e) {
