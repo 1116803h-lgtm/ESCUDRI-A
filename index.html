@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Escudriñad — Estudio bíblico</title>
+<meta name="description" content="Lee, busca y escudriña las Escrituras. Funciona sin conexión.">
+<meta name="theme-color" content="#15302E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Escudriñad">
+<meta name="application-name" content="Escudriñad">
+<style>
+/* ==========================================================================
+   Escudriñad — edición de estudio. Sistema de diseño "rúbrica y oro":
+   columna de lectura como edición crítica manuscrita; cromo sobrio en tinta
+   petróleo; acentos en latón; rojo rúbrica para las palabras de Cristo.
+   ========================================================================== */
+:root{
+  --paper:#F4F1E8; --paper-2:#EEEADD; --ink:#22262C; --ink-soft:#4A4E52;
+  --board:#15302E; --board-2:#1C3B38; --board-ink:#DCD8C8; --board-soft:#9FB0A6;
+  --brass:#B5893C; --brass-2:#946f2c; --rubric:#A5342B; --sand:#8A8375;
+  --line:#DAD3C2; --line-2:#C9C1AC;
+  --hl-amber:#F3D77E; --hl-rose:#F2B8C6; --hl-sky:#AFD6E8; --hl-mint:#B7DEB6; --hl-lilac:#D3C1E8;
+  --sel:#EFE6CE;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,'Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','Cascadia Mono',Menlo,Consolas,monospace;
+  --sb-w:322px;
+}
+body.sepia{ --paper:#EDE2CE; --paper-2:#E6DAC2; --ink:#3A2E22; --ink-soft:#5b4a38; --line:#D8C7A7; --line-2:#c9b58f; --sel:#E3D3B0; }
+body.night{
+  --paper:#171B20; --paper-2:#1E242B; --ink:#E7E2D4; --ink-soft:#B4AE9F;
+  --board:#0F1417; --board-2:#171D22; --board-ink:#E4DFD1; --board-soft:#8B9691;
+  --line:#2A3138; --line-2:#333B43; --brass:#D2A24E; --rubric:#E07A63; --sand:#8f8778; --sel:#2A3138;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.5;
+  -webkit-text-size-adjust:100%; overflow:hidden;
+}
+button{font-family:inherit; color:inherit; cursor:pointer}
+input,select,textarea{font-family:inherit; font-size:14px}
+::selection{background:var(--sel)}
+
+/* ---- Estructura general ---- */
+#app{display:flex; height:100dvh; width:100%}
+#sidebar{
+  width:var(--sb-w); flex:0 0 var(--sb-w); background:var(--board); color:var(--board-ink);
+  display:flex; flex-direction:column; border-right:1px solid rgba(0,0,0,.35);
+  transition:margin-left .22s ease, width .22s ease, flex-basis .22s ease; z-index:40;
+}
+#main{flex:1 1 auto; display:flex; flex-direction:column; min-width:0}
+
+/* Pestaña para replegar/expandir el panel lateral (escritorio) */
+#sbToggle{
+  position:fixed; top:50%; transform:translateY(-50%); left:var(--sb-w); margin-left:-1px;
+  width:22px; height:64px; z-index:45; cursor:pointer;
+  border:1px solid rgba(0,0,0,.35); border-left:none; border-radius:0 9px 9px 0;
+  background:var(--board); color:var(--brass); font-family:var(--serif); font-size:16px; line-height:1;
+  display:flex; align-items:center; justify-content:center; padding:0;
+  box-shadow:3px 0 10px rgba(0,0,0,.16); transition:left .22s ease, background .15s, color .15s;
+}
+#sbToggle:hover{background:var(--brass); color:#fff}
+body.sb-collapsed #sbToggle{left:0}
+
+/* ---- Barra superior ---- */
+#topbar{
+  display:flex; align-items:center; gap:10px; padding:9px 14px;
+  background:var(--board-2); color:var(--board-ink); border-bottom:1px solid rgba(0,0,0,.35);
+  flex-wrap:nowrap;
+}
+#topbar .brand{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-size:19px; letter-spacing:.3px}
+#topbar .brand b{font-weight:600}
+#topbar .brand .mk{color:var(--brass); font-size:22px; line-height:1}
+.hamb{display:none}
+#topbar .spacer{flex:1 1 auto}
+.tb-group{display:flex; align-items:center; gap:6px}
+.tb-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.16); color:var(--board-ink);
+  border-radius:8px; padding:6px 10px; font-size:13px; display:inline-flex; align-items:center; gap:6px;
+}
+.tb-btn:hover{border-color:var(--brass); color:#fff}
+.tb-btn.on{background:var(--brass); border-color:var(--brass); color:#20180a; font-weight:600}
+.tb-btn .dot{width:9px;height:9px;border-radius:50%}
+select.tb-sel{
+  background:var(--board); color:var(--board-ink); border:1px solid rgba(255,255,255,.2);
+  border-radius:8px; padding:6px 8px; max-width:220px;
+}
+#topSearch{
+  display:flex; align-items:center; gap:6px; background:var(--board);
+  border:1px solid rgba(255,255,255,.2); border-radius:8px; padding:4px 8px; min-width:150px;
+}
+#topSearch input{background:transparent; border:0; outline:0; color:var(--board-ink); width:150px}
+#topSearch input::placeholder{color:var(--board-soft)}
+
+/* ---- Sidebar: pestañas ---- */
+.tabs{display:flex; gap:2px; padding:8px 8px 0; background:var(--board)}
+.tab{
+  flex:1; text-align:center; padding:8px 4px; font-size:11.5px; letter-spacing:.4px; text-transform:uppercase;
+  border:0; background:transparent; color:var(--board-soft); border-bottom:2px solid transparent;
+}
+.tab.on{color:var(--brass); border-bottom-color:var(--brass)}
+.tab:hover{color:var(--board-ink)}
+.panel{display:none; padding:12px; overflow:auto; flex:1}
+.panel.on{display:block}
+.panel h4{margin:14px 0 7px; font-size:11px; letter-spacing:.7px; text-transform:uppercase; color:var(--board-soft); font-weight:600}
+.panel h4:first-child{margin-top:0}
+
+/* Navegación libros */
+.testament-row{display:flex; gap:6px; margin-bottom:8px}
+.testament-row button{
+  flex:1; background:var(--board-2); border:1px solid rgba(255,255,255,.14); color:var(--board-ink);
+  padding:6px; border-radius:7px; font-size:12px;
+}
+.testament-row button.on{background:var(--brass); color:#20180a; border-color:var(--brass); font-weight:600}
+.booklist{display:grid; grid-template-columns:1fr 1fr; gap:4px}
+.book-b{
+  text-align:left; background:transparent; border:1px solid rgba(255,255,255,.10); color:var(--board-ink);
+  padding:6px 8px; border-radius:6px; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.book-b:hover{border-color:var(--brass)}
+.book-b.on{background:var(--board-2); border-color:var(--brass); color:#fff}
+.chaptergrid{display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin-top:6px}
+.chap-b{
+  background:var(--board-2); border:1px solid rgba(255,255,255,.10); color:var(--board-ink);
+  padding:6px 0; border-radius:6px; font-size:13px; text-align:center; font-family:var(--mono);
+}
+.chap-b:hover{border-color:var(--brass)}
+.chap-b.on{background:var(--brass); color:#20180a; border-color:var(--brass); font-weight:700}
+
+/* Controles genéricos del sidebar */
+.field{margin-bottom:9px}
+.field label{display:block; font-size:11px; color:var(--board-soft); margin-bottom:3px; letter-spacing:.3px}
+.field input[type=text], .field textarea, .field select{
+  width:100%; background:var(--board-2); border:1px solid rgba(255,255,255,.16);
+  color:var(--board-ink); border-radius:7px; padding:8px 9px;
+}
+.field textarea{resize:vertical; min-height:60px; line-height:1.4}
+.row-checks{display:flex; flex-wrap:wrap; gap:10px; margin:4px 0 8px}
+.row-checks label{display:flex; align-items:center; gap:5px; font-size:12.5px; color:var(--board-ink)}
+.btn{
+  background:var(--brass); color:#20180a; border:0; border-radius:8px; padding:8px 12px;
+  font-size:13px; font-weight:600; letter-spacing:.2px;
+}
+.btn:hover{background:#c99a49}
+.btn.ghost{background:transparent; color:var(--board-ink); border:1px solid rgba(255,255,255,.2); font-weight:500}
+.btn.ghost:hover{border-color:var(--brass); color:#fff}
+.btn.sm{padding:5px 9px; font-size:12px}
+.btn.danger{background:transparent; border:1px solid var(--rubric); color:var(--rubric)}
+.btn-row{display:flex; gap:7px; flex-wrap:wrap}
+
+/* Resultados de búsqueda */
+.result-meta{font-size:12px; color:var(--board-soft); margin:8px 0}
+.result{
+  padding:8px 9px; border-radius:8px; border:1px solid rgba(255,255,255,.08);
+  margin-bottom:6px; background:var(--board-2); cursor:pointer;
+}
+.result:hover{border-color:var(--brass)}
+.result .ref{font-family:var(--mono); font-size:11.5px; color:var(--brass); margin-bottom:2px}
+.result .snip{font-family:var(--serif); font-size:13.5px; line-height:1.4; color:var(--board-ink)}
+.result .snip mark{background:var(--brass); color:#20180a; border-radius:2px; padding:0 1px}
+.bookbars{margin-top:4px}
+.bookbar{display:flex; align-items:center; gap:7px; font-size:12px; margin:3px 0}
+.bookbar .bn{width:74px; flex:0 0 74px; color:var(--board-ink); font-size:11.5px}
+.bookbar .track{flex:1; height:9px; background:var(--board-2); border-radius:5px; overflow:hidden}
+.bookbar .fill{height:100%; background:linear-gradient(90deg,var(--brass),var(--brass-2))}
+.bookbar .cnt{width:34px; flex:0 0 34px; text-align:right; font-family:var(--mono); color:var(--board-soft); font-size:11px}
+
+/* Biblias / versiones */
+.ver-item{
+  display:flex; align-items:center; gap:8px; padding:8px 9px; border-radius:8px;
+  border:1px solid rgba(255,255,255,.10); background:var(--board-2); margin-bottom:6px;
+}
+.ver-item .vi-main{flex:1; min-width:0}
+.ver-item .vi-name{font-size:13px; color:var(--board-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ver-item .vi-sub{font-size:11px; color:var(--board-soft); font-family:var(--mono)}
+.ver-item .pill{font-size:10px; padding:2px 6px; border-radius:20px; border:1px solid var(--brass); color:var(--brass)}
+.ver-item .pill.prim{background:var(--brass); color:#20180a; border-color:var(--brass)}
+.dropzone{
+  border:1.5px dashed rgba(255,255,255,.28); border-radius:10px; padding:16px; text-align:center;
+  color:var(--board-soft); font-size:12.5px; margin-top:8px;
+}
+.dropzone.drag{border-color:var(--brass); color:var(--brass)}
+.mini{font-size:11px; color:var(--board-soft); line-height:1.45}
+
+/* Apartados */
+.apartado{
+  border:1px solid rgba(255,255,255,.10); border-radius:8px; padding:9px; margin-bottom:8px; background:var(--board-2);
+}
+.apartado .ap-head{display:flex; align-items:center; gap:7px}
+.apartado .ap-swatch{width:12px;height:12px;border-radius:3px;flex:0 0 12px}
+.apartado .ap-name{flex:1; font-size:13.5px; font-weight:600; color:var(--board-ink)}
+.apartado .ap-count{font-size:11px; color:var(--board-soft); font-family:var(--mono)}
+.ap-verse{font-size:12.5px; color:var(--board-ink); padding:5px 0; border-top:1px solid rgba(255,255,255,.07); font-family:var(--serif); line-height:1.4}
+.ap-verse .apv-ref{font-family:var(--mono); font-size:11px; color:var(--brass); cursor:pointer}
+.ap-verse .apv-x{float:right; color:var(--board-soft); cursor:pointer; border:0; background:none}
+
+/* ============ Columna de lectura ============ */
+#main{position:relative}
+#reader{flex:1; overflow:auto; padding:0; background:var(--paper)}
+.chnav{
+  position:absolute; top:52px; bottom:0; margin:auto 0; height:46px; width:46px; z-index:15;
+  border:1px solid var(--line-2); border-radius:50%; background:var(--paper-2); color:var(--brass);
+  font-family:var(--serif); font-size:26px; line-height:1; cursor:pointer; opacity:.55;
+  box-shadow:0 2px 10px rgba(0,0,0,.10); transition:opacity .15s, background .15s, color .15s, transform .1s;
+  display:flex; align-items:center; justify-content:center; padding-bottom:3px;
+}
+.chnav:hover{opacity:1; background:var(--brass); color:#fff; border-color:var(--brass)}
+.chnav:active{transform:scale(.92)}
+.chnav.prev{left:16px} .chnav.next{right:16px}
+.chnav[disabled]{opacity:0; pointer-events:none}
+body.night .chnav{box-shadow:0 2px 10px rgba(0,0,0,.4)}
+
+/* Velo detrás del panel lateral en móvil: tocarlo lo cierra */
+#navScrim{position:fixed; inset:0; background:rgba(8,14,13,.46); z-index:39; opacity:0; pointer-events:none; transition:opacity .2s ease}
+@media(max-width:860px){ .chnav{width:40px; height:40px; font-size:22px; opacity:.7} .chnav.prev{left:6px} .chnav.next{right:6px} }
+.reading{max-width:760px; margin:0 auto; padding:26px 32px 120px}
+body.compare .reading{max-width:none}
+.chapter-head{
+  text-align:center; margin:6px 0 20px; padding-bottom:14px; border-bottom:1px solid var(--line-2);
+}
+.chapter-head .bk{font-family:var(--sans); font-size:12px; letter-spacing:2.5px; text-transform:uppercase; color:var(--sand)}
+.chapter-head .cn{font-family:var(--serif); font-size:40px; color:var(--brass); line-height:1.05; margin-top:2px; font-weight:600}
+.chapter-head .cn small{font-size:14px; color:var(--sand); font-family:var(--sans); letter-spacing:1px; display:block; text-transform:uppercase}
+
+.pericope{
+  font-family:var(--serif); text-align:center; color:var(--brass-2); font-weight:600;
+  font-size:18px; margin:26px auto 12px; max-width:88%; position:relative; line-height:1.35;
+}
+.pericope::before, .pericope::after{
+  content:""; display:block; width:46px; height:1px; background:var(--line-2); margin:9px auto;
+}
+.pericope::after{display:none}
+body.night .pericope, body.sepia .pericope{color:var(--brass)}
+
+/* Un versículo */
+.v{
+  font-family:var(--serif); font-size:var(--reading-size,19px); line-height:1.72;
+  padding:2px 6px 2px 6px; border-radius:5px; position:relative; scroll-margin-top:80px;
+  transition:background .15s;
+}
+.v .vn{
+  font-family:var(--mono); font-size:.62em; color:var(--sand); vertical-align:.5em;
+  margin-right:5px; font-weight:600; cursor:pointer; user-select:none;
+}
+.v .vt{color:var(--ink)}
+.v.sel{background:var(--sel); box-shadow:inset 0 0 0 1px var(--line-2)}
+.v.flash{animation:flash 1.3s ease}
+@keyframes flash{0%,40%{background:var(--hl-amber)}100%{background:transparent}}
+.v .pbrk{display:block; height:.55em}
+.v .woc{color:inherit}
+body.redletter .v .woc{color:var(--rubric)}
+.v .xref{font-size:.6em; color:var(--brass); vertical-align:.55em; margin:0 1px; cursor:help}
+body:not(.showxref) .v .xref{display:none}
+.v em{font-style:italic; color:var(--ink-soft)}
+
+/* Números de Strong */
+.v .strong, .cmp-cell .strong{
+  font-family:var(--mono); font-size:.56em; color:#3d6ea5; vertical-align:.5em;
+  margin:0 1px; cursor:pointer; font-weight:600; border-bottom:1px dotted #3d6ea5;
+}
+.v .strong:hover, .cmp-cell .strong:hover{color:var(--rubric); border-bottom-color:var(--rubric)}
+body.sepia .v .strong{color:#7a5a2a} body.night .v .strong{color:#8fb4d8; border-bottom-color:#5a7fa0}
+body:not(.showstrong) .strong{display:none}
+
+/* Cuadro léxico Strong */
+.lex-entry{border:1px solid var(--line-2); border-radius:10px; padding:14px; margin-bottom:12px; background:var(--paper-2)}
+.lex-entry:last-child{margin-bottom:0}
+.lex-top{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px}
+.lex-word{font-family:var(--serif); font-size:34px; line-height:1.1; color:var(--ink)}
+.lex-word.rtl{direction:rtl}
+.lex-code{font-family:var(--mono); font-size:12px; color:#fff; background:#3d6ea5; padding:2px 8px; border-radius:20px}
+.lex-code.gr{background:var(--rubric)}
+.lex-translit{font-family:var(--serif); font-style:italic; color:var(--ink-soft); font-size:16px}
+.lex-pron{font-family:var(--mono); font-size:12px; color:var(--sand)}
+.lex-row{margin:7px 0; font-size:14px; line-height:1.5}
+.lex-row .lab{font-size:11px; letter-spacing:.5px; text-transform:uppercase; color:var(--sand); display:block; margin-bottom:1px}
+.lex-morph code{font-family:var(--mono); font-size:12px; background:var(--sel); padding:1px 5px; border-radius:4px}
+.lex-langbar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--line)}
+.lex-langbar .lab{font-size:11px; letter-spacing:.5px; text-transform:uppercase; color:var(--sand)}
+.seg{display:inline-flex; border:1px solid var(--line-2); border-radius:8px; overflow:hidden}
+.seg-b{border:0; background:var(--paper-2); color:var(--ink-soft); font-size:12.5px; padding:5px 12px; cursor:pointer; font-family:inherit}
+.seg-b+.seg-b{border-left:1px solid var(--line-2)}
+.seg-b.on{background:var(--brass); color:#fff; font-weight:600}
+.en-note{color:var(--sand); font-weight:400; text-transform:none; letter-spacing:0; font-size:10px}
+
+/* ===== Ley de Cristo ===== */
+.ley-intro{margin-bottom:10px}
+.ley-title{font-family:var(--serif); font-size:20px; color:var(--brass); line-height:1.1}
+.ley-sub{font-size:11.5px; color:var(--board-soft); margin-top:3px}
+.ley-sec{border:1px solid rgba(255,255,255,.08); border-radius:9px; margin-bottom:7px; overflow:hidden; background:rgba(255,255,255,.02)}
+.ley-sec-h{display:flex; align-items:center; gap:8px; padding:9px 10px; cursor:pointer; user-select:none}
+.ley-sec-h:hover{background:rgba(255,255,255,.04)}
+.ley-sec-h .cx{font-family:var(--mono); font-size:10px; color:var(--brass); min-width:22px}
+.ley-sec-h .tt{flex:1; font-size:12px; font-weight:600; color:var(--board-ink); letter-spacing:.3px; text-transform:uppercase; line-height:1.3}
+.ley-sec-h .ct{font-family:var(--mono); font-size:10px; color:var(--board-soft)}
+.ley-sec-h .ar{color:var(--board-soft); transition:transform .18s; font-size:12px}
+.ley-sec.open .ley-sec-h .ar{transform:rotate(90deg)}
+.ley-sec-body{display:none; padding:2px 10px 8px}
+.ley-sec.open .ley-sec-body{display:block}
+.ley-item{padding:8px 0; border-top:1px solid rgba(255,255,255,.06)}
+.ley-item:first-child{border-top:none}
+.ley-item .ln{display:flex; gap:7px; align-items:baseline}
+.ley-item .num{font-family:var(--mono); font-size:10px; color:var(--brass); min-width:26px; text-align:right}
+.ley-item .tx{flex:1; font-size:13px; line-height:1.5; color:var(--board-ink)}
+.ley-item.jesus .tx{color:#e2a3a0}
+.ley-item.jesus .num{color:#e2a3a0}
+.ley-note{display:block; font-size:10.5px; font-style:italic; color:var(--board-soft); margin-top:2px}
+.ley-refs{display:flex; flex-wrap:wrap; gap:4px; margin:5px 0 0 33px}
+.ref-chip{font-family:var(--mono); font-size:10.5px; color:var(--board); background:var(--brass); border:none; border-radius:5px; padding:2px 7px; cursor:pointer; font-weight:600}
+.ref-chip:hover{background:#d2a24a}
+.ley-badge{font-size:9px; background:rgba(229,163,160,.2); color:#e2a3a0; border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
+.ley-dbadge{font-size:9px; background:rgba(255,255,255,.08); color:var(--board-soft); border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
+#leyFilter{width:100%}
+.pill.strong-pill{background:#3d6ea5; color:#fff; font-size:10px; padding:1px 6px; border-radius:20px; vertical-align:middle}
+
+/* Análisis mejorado */
+.ana-summary{background:var(--paper-2); border:1px solid var(--line-2); border-radius:12px; padding:14px; margin-bottom:14px; text-align:center}
+.ana-big{font-family:var(--serif); font-size:34px; color:var(--brass); line-height:1}
+.ana-sub{color:var(--ink-soft); font-size:13px; margin-top:2px}
+.ana-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:6px 14px; margin-top:12px; text-align:left}
+.ana-grid>div{display:flex; justify-content:space-between; border-bottom:1px dotted var(--line); padding:3px 0; font-size:13px}
+.ana-grid span{color:var(--sand)} .ana-grid b{color:var(--ink); font-family:var(--mono); font-size:12px}
+.ana-section{margin:16px 0}
+.ana-section h4{margin:0 0 8px; font-size:12px; letter-spacing:.6px; text-transform:uppercase; color:var(--sand)}
+.lex-note{font-size:12.5px; color:var(--ink-soft); margin:0 0 8px}
+.lexcard{border:1px solid var(--line-2); border-radius:10px; padding:11px 12px; margin-bottom:9px; background:var(--paper-2); transition:border-color .12s}
+.lexcard:hover{border-color:var(--brass)}
+.lexcard-h{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap}
+.lexcard-h .lex-word{font-size:24px}
+.lexcard-count{margin-left:auto; font-family:var(--mono); font-size:15px; color:var(--brass); font-weight:600}
+.lexcard-count small{color:var(--sand); font-weight:400}
+.lexcard-def{font-size:13px; color:var(--ink-soft); margin-top:6px; line-height:1.45}
+.lexcard-morph{font-size:11.5px; color:var(--sand); font-family:var(--mono); margin-top:5px}
+.collocs{display:flex; flex-wrap:wrap; gap:6px}
+.colchip{border:1px solid var(--line-2); background:var(--paper-2); border-radius:20px; padding:4px 8px 4px 11px; font-size:13px; color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:6px}
+.colchip:hover{border-color:var(--brass); color:var(--brass)}
+.colchip span{font-family:var(--mono); font-size:11px; color:#fff; background:var(--sand); border-radius:20px; padding:0 6px; min-width:18px; text-align:center}
+.colchip:hover span{background:var(--brass)}
+.kwic{max-height:340px; overflow:auto; border:1px solid var(--line); border-radius:10px}
+.kwic-row{padding:8px 11px; border-bottom:1px solid var(--line); font-size:13.5px; cursor:pointer; line-height:1.5}
+.kwic-row:last-child{border-bottom:none}
+.kwic-row:hover{background:var(--sel)}
+.kwic .kref{font-family:var(--mono); font-size:11px; color:var(--brass); margin-right:6px; white-space:nowrap}
+.kwic .khit{color:var(--rubric); font-weight:700}
+
+/* Resaltados */
+.v.hl-amber{background:rgba(243,215,126,.55)} .v.hl-rose{background:rgba(242,184,198,.55)}
+.v.hl-sky{background:rgba(175,214,232,.55)} .v.hl-mint{background:rgba(183,222,182,.55)}
+.v.hl-lilac{background:rgba(211,193,232,.55)}
+body.night .v.hl-amber{background:rgba(243,215,126,.22)} body.night .v.hl-rose{background:rgba(242,184,198,.22)}
+body.night .v.hl-sky{background:rgba(175,214,232,.22)} body.night .v.hl-mint{background:rgba(183,222,182,.22)}
+body.night .v.hl-lilac{background:rgba(211,193,232,.22)}
+.v .noteflag{color:var(--brass); font-size:.62em; vertical-align:.5em; margin-left:3px; cursor:pointer}
+.v .apflag{font-size:.6em; vertical-align:.5em; margin-left:2px}
+
+/* Modo comparar: filas en rejilla */
+.cmp-row{display:grid; gap:0; border-bottom:1px solid var(--line); align-items:start}
+.cmp-row:hover{background:rgba(0,0,0,.015)}
+.cmp-vn{font-family:var(--mono); font-size:12px; color:var(--sand); padding:10px 6px; text-align:right; font-weight:600; cursor:pointer}
+.cmp-cell{padding:10px 14px; border-left:1px solid var(--line); font-family:var(--serif); font-size:17px; line-height:1.6}
+.cmp-head{position:sticky; top:0; background:var(--paper-2); z-index:5; border-bottom:1px solid var(--line-2)}
+.cmp-head .cmp-cell,.cmp-head .cmp-vn{font-family:var(--sans); font-size:12px; letter-spacing:.5px; text-transform:uppercase; color:var(--sand); padding:9px 14px; font-weight:600; cursor:default}
+.cmp-row.hl-amber,.cmp-row.hl-rose,.cmp-row.hl-sky,.cmp-row.hl-mint,.cmp-row.hl-lilac{background:var(--sel)}
+
+/* Barra de acción de versículo */
+#vbar{
+  position:fixed; z-index:60; background:var(--board); color:var(--board-ink);
+  border:1px solid var(--brass); border-radius:11px; padding:7px; display:none;
+  box-shadow:0 10px 30px rgba(0,0,0,.32); align-items:center; gap:6px;
+}
+#vbar.on{display:flex}
+#vbar .vb-ref{font-family:var(--mono); font-size:11px; color:var(--brass); margin-right:2px}
+.swatches{display:flex; gap:4px}
+.swatch{width:20px;height:20px;border-radius:5px;border:1px solid rgba(255,255,255,.35); cursor:pointer}
+.swatch.clear{background:repeating-linear-gradient(45deg,#555,#555 3px,#777 3px,#777 6px)}
+#vbar .vb-btn{background:var(--board-2); border:1px solid rgba(255,255,255,.18); border-radius:7px; padding:5px 8px; font-size:12px; color:var(--board-ink)}
+#vbar .vb-btn:hover{border-color:var(--brass); color:#fff}
+
+/* Modal genérico */
+.modal-bg{position:fixed; inset:0; background:rgba(10,15,14,.55); display:none; z-index:80; align-items:center; justify-content:center; padding:16px}
+.modal-bg.on{display:flex}
+.modal{background:var(--paper); color:var(--ink); border-radius:14px; max-width:520px; width:100%; max-height:86dvh; overflow:auto; border:1px solid var(--line-2)}
+.modal .m-head{display:flex; align-items:center; padding:14px 18px; border-bottom:1px solid var(--line); font-family:var(--serif); font-size:18px}
+.modal .m-head .spacer{flex:1}
+.modal .m-body{padding:16px 18px}
+.modal .m-body label{font-size:12px; color:var(--ink-soft); display:block; margin:10px 0 4px}
+.modal .m-body input[type=text], .modal .m-body textarea, .modal .m-body select{
+  width:100%; padding:9px 10px; border:1px solid var(--line-2); border-radius:8px; background:var(--paper-2); color:var(--ink);
+}
+.modal .m-body textarea{min-height:90px; resize:vertical; line-height:1.5; font-family:var(--serif)}
+.modal .m-foot{display:flex; gap:8px; justify-content:flex-end; padding:12px 18px; border-top:1px solid var(--line)}
+.xbtn{background:none;border:0;font-size:22px;color:var(--ink-soft);line-height:1}
+.color-choice{display:flex; gap:6px; margin-top:6px}
+.color-choice .cc{width:26px;height:26px;border-radius:6px;border:2px solid transparent; cursor:pointer}
+.color-choice .cc.on{border-color:var(--ink)}
+
+/* Toast */
+#toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--board); color:var(--board-ink);
+  padding:10px 16px; border-radius:24px; font-size:13px; border:1px solid var(--brass); z-index:90; opacity:0; transition:opacity .2s; pointer-events:none}
+#toast.on{opacity:1}
+
+/* Loader */
+#loader{position:fixed; inset:0; background:var(--board); color:var(--board-ink); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; z-index:200; gap:14px}
+#loader .lk{font-family:var(--serif); font-size:30px; color:var(--brass)}
+#loader .lb{width:200px;height:4px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden}
+#loader .lf{height:100%;width:35%;background:var(--brass);animation:load 1.1s ease-in-out infinite}
+@keyframes load{0%{margin-left:-35%}100%{margin-left:100%}}
+#loader .lt{font-size:13px;color:var(--board-soft)}
+
+.empty{color:var(--board-soft); font-size:13px; text-align:center; padding:22px 8px; line-height:1.5}
+.reading .empty{color:var(--sand)}
+
+/* Responsive */
+/* App INSTALADA: con la barra de estado opaca, iOS/Android ya reservan la
+   franja superior (incluida la isla) y colocan la app debajo. Solo cubrimos
+   los laterales por si giras el teléfono con la muesca a un costado. No aplica
+   en el navegador ni en escritorio, así que la vista de PC no cambia. */
+@media (display-mode: standalone), (display-mode: fullscreen){
+  #topbar{
+    padding-top: calc(9px + env(safe-area-inset-top, 0px));
+    padding-left: calc(14px + env(safe-area-inset-left, 0px));
+    padding-right: calc(14px + env(safe-area-inset-right, 0px));
+  }
+  .tabs{ padding-top: calc(8px + env(safe-area-inset-top, 0px)); }
+}
+
+@media (min-width:861px){
+  body.sb-collapsed #sidebar{ width:0; flex-basis:0; overflow:hidden; border-right:none }
+  body.sb-collapsed .chnav.prev{ left:44px }
+}
+@media (max-width:860px){
+  :root{--sb-w:290px}
+  #sidebar{position:fixed; top:0; bottom:0; left:0; box-shadow:6px 0 24px rgba(0,0,0,.3)}
+  body.nav-closed #sidebar{margin-left:calc(-1 * var(--sb-w))}
+  body:not(.nav-closed) #navScrim{opacity:1; pointer-events:auto}
+  #sbToggle{display:none}
+  .hamb{display:inline-flex}
+  #topbar .brand .txt{display:none}
+  #topSearch input{width:110px}
+  .reading{padding:20px 18px 120px}
+  .cmp-cell{font-size:15px; padding:8px 9px}
+}
+@media (max-width:520px){
+  #topbar{gap:7px; padding:8px 10px}
+  .tb-label{display:none}
+  select.tb-sel{max-width:130px}
+}
+</style>
+</head>
+<body class="redletter">
+
+<div id="loader">
+  <div class="lk">Escudriñad</div>
+  <div class="lb"><div class="lf"></div></div>
+  <div class="lt" id="loaderText">Abriendo las Escrituras…</div>
+</div>
+
+<div id="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="sidebar">
+    <div class="tabs">
+      <button class="tab on" data-tab="nav">Libros</button>
+      <button class="tab" data-tab="search">Buscar</button>
+      <button class="tab" data-tab="aps">Apartados</button>
+      <button class="tab" data-tab="ana">Análisis</button>
+      <button class="tab" data-tab="ley">Ley</button>
+      <button class="tab" data-tab="ver">Biblias</button>
+    </div>
+
+    <!-- Navegación -->
+    <div class="panel on" id="panel-nav">
+      <div class="testament-row">
+        <button data-t="AT" class="on">Antiguo</button>
+        <button data-t="NT">Nuevo</button>
+      </div>
+      <div class="booklist" id="booklist"></div>
+      <h4 id="chapTitle" style="display:none">Capítulos</h4>
+      <div class="chaptergrid" id="chaptergrid"></div>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="panel" id="panel-search">
+      <div class="field">
+        <label>Palabras o frase</label>
+        <input type="text" id="qMain" placeholder="p. ej. gracia verdad">
+      </div>
+      <div class="field">
+        <label>Excluir (ninguna de estas)</label>
+        <input type="text" id="qExcl" placeholder="opcional">
+      </div>
+      <div class="field">
+        <label>Coincidencia</label>
+        <select id="qMode">
+          <option value="all">Todas las palabras (Y)</option>
+          <option value="any">Cualquier palabra (O)</option>
+          <option value="phrase">Frase exacta</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Ámbito</label>
+        <select id="qScope">
+          <option value="all">Toda la Biblia</option>
+          <option value="AT">Antiguo Testamento</option>
+          <option value="NT">Nuevo Testamento</option>
+          <option value="book">Libro actual</option>
+        </select>
+      </div>
+      <div class="row-checks">
+        <label><input type="checkbox" id="qWord"> Palabra completa</label>
+        <label><input type="checkbox" id="qCase"> Distinguir may/min</label>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="doSearch">Buscar</button>
+        <button class="btn ghost sm" id="clrSearch">Limpiar</button>
+      </div>
+      <div class="result-meta" id="searchMeta"></div>
+      <div id="searchResults"></div>
+    </div>
+
+    <!-- Apartados -->
+    <div class="panel" id="panel-aps">
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn sm" id="newApartado">Nuevo apartado</button>
+        <button class="btn ghost sm" id="exportStudy">Exportar</button>
+        <button class="btn ghost sm" id="importStudyBtn">Importar</button>
+        <input type="file" id="importStudyFile" accept="application/json" hidden>
+      </div>
+      <div id="apList"></div>
+      <p class="mini" style="margin-top:12px">Los apartados, subrayados y notas se guardan en este navegador. Usa <b>Exportar</b> para llevar tu estudio a otro equipo.</p>
+    </div>
+
+    <!-- Análisis -->
+    <div class="panel" id="panel-ana">
+      <div class="field">
+        <label>Término a analizar</label>
+        <input type="text" id="anaTerm" placeholder="p. ej. amor">
+      </div>
+      <div class="row-checks">
+        <label><input type="checkbox" id="anaWord" checked> Palabra completa</label>
+      </div>
+      <button class="btn" id="doAna">Analizar</button>
+      <div id="anaResult"></div>
+    </div>
+
+    <!-- Ley de Cristo -->
+    <div class="panel" id="panel-ley">
+      <div class="ley-intro">
+        <div class="ley-title">La Ley de Cristo</div>
+        <div class="ley-sub">Mandamientos del Nuevo Testamento. Toca una <b>cita</b> para abrirla en el lector.</div>
+      </div>
+      <div class="field">
+        <input type="text" id="leyFilter" placeholder="Filtrar mandamiento o palabra…">
+      </div>
+      <div id="leyBody"><p class="empty">Cargando…</p></div>
+    </div>
+
+    <!-- Biblias -->
+    <div class="panel" id="panel-ver">
+      <h4>Versiones cargadas</h4>
+      <div id="verList"></div>
+      <h4>Añadir versión</h4>
+      <div class="dropzone" id="dropzone">
+        Arrastra aquí un archivo <b>.bblx</b> / <b>.bbl</b> (e-Sword)<br>o
+        <button class="btn ghost sm" id="pickFile" style="margin-top:8px">Elegir archivo…</button>
+        <input type="file" id="verFile" accept=".bblx,.bbl,.SQLite3,.db" hidden>
+      </div>
+      <p class="mini" style="margin-top:8px">También puedes convertir módulos por lote con <code>convertir_bblx.py</code> y colocarlos en la carpeta <code>data/</code>.</p>
+      <div id="verMsg" class="mini" style="margin-top:8px"></div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div id="main">
+    <div id="topbar">
+      <button class="tb-btn hamb" id="hamb" title="Menú">☰</button>
+      <div class="brand"><span class="txt"><b>Escudriñad</b></span></div>
+      <div class="spacer"></div>
+      <div class="tb-group">
+        <select class="tb-sel" id="primarySel" title="Versión principal"></select>
+        <button class="tb-btn" id="cmpBtn" title="Comparar versiones"><span class="tb-label">Comparar</span></button>
+      </div>
+      <div class="tb-group">
+        <button class="tb-btn on" id="redBtn" title="Palabras de Cristo en rojo"><span class="dot" style="background:var(--rubric)"></span><span class="tb-label">Cristo</span></button>
+        <button class="tb-btn" id="xrefBtn" title="Marcadores de referencia">Ref</button>
+        <button class="tb-btn" id="strongBtn" title="Números de Strong (hebreo/griego)" style="display:none">S<span class="tb-label">trong</span></button>
+      </div>
+      <div class="tb-group">
+        <button class="tb-btn" id="fontBtn" title="Tamaño de letra">A±</button>
+        <button class="tb-btn" id="themeBtn" title="Tema de lectura">◐</button>
+      </div>
+      <div id="topSearch">
+        <span style="color:var(--board-soft)">⌕</span>
+        <input type="text" id="quickSearch" placeholder="Buscar…">
+      </div>
+    </div>
+    <div id="reader"><div class="reading"><div class="empty">Cargando…</div></div></div>
+    <button class="chnav prev" id="chPrev" title="Capítulo anterior" aria-label="Capítulo anterior">‹</button>
+    <button class="chnav next" id="chNext" title="Capítulo siguiente" aria-label="Capítulo siguiente">›</button>
+  </div>
+  <button id="sbToggle" title="Replegar/expandir el panel" aria-label="Replegar o expandir el panel lateral">‹</button>
+  <div id="navScrim" aria-hidden="true"></div>
+</div>
+
+<!-- Barra de acción de versículo -->
+<div id="vbar">
+  <span class="vb-ref" id="vbarRef"></span>
+  <div class="swatches" id="vbarSwatches"></div>
+  <button class="vb-btn" id="vbAp">+ Apartado</button>
+  <button class="vb-btn" id="vbNote">Nota</button>
+  <button class="vb-btn" id="vbCopy">Copiar</button>
+</div>
+
+<!-- Modales -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- sql.js se carga dinámicamente (con respaldo de rutas) desde ensureSQL() -->
+
+<script>
+/* ======================= parser.js (embebido) ======================= */
+/* ============================================================================
+   parser.js — Marcado RTF-lite de módulos e-Sword (.bblx) -> HTML.
+   Soporta dos variantes de RV1960:
+     · Simple:  \par, {\qc \b Título\par}, {\cf6 …} (Cristo), {\super\cf6 (A)} (ref)
+     · Strong:  {\cf11\super H7225  NCcSFC} (número Strong + morfología),
+                \bullet (palabra añadida), «» como \'ab \'bb
+   Salida: { headings:[…], body:'…' } con clases .woc .xref .strong (+ data-s,data-m)
+   ==========================================================================*/
+(function (root) {
+  'use strict';
+
+  var CP1252 = {0x80:'\u20AC',0x82:'\u201A',0x83:'\u0192',0x84:'\u201E',0x85:'\u2026',
+    0x86:'\u2020',0x87:'\u2021',0x88:'\u02C6',0x89:'\u2030',0x8A:'\u0160',0x8B:'\u2039',
+    0x8C:'\u0152',0x8E:'\u017D',0x91:'\u2018',0x92:'\u2019',0x93:'\u201C',0x94:'\u201D',
+    0x95:'\u2022',0x96:'\u2013',0x97:'\u2014',0x98:'\u02DC',0x99:'\u2122',0x9A:'\u0161',
+    0x9B:'\u203A',0x9C:'\u0153',0x9E:'\u017E',0x9F:'\u0178'};
+  function hexChar(hh){var n=parseInt(hh,16);if(CP1252[n])return CP1252[n];return String.fromCharCode(n);}
+
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  function tokenize(src){
+    var toks=[],i=0,n=src.length;
+    while(i<n){var c=src[i];
+      if(c==='\\'){
+        var nx=src[i+1];
+        if(nx==="'"&&/[0-9a-fA-F]{2}/.test(src.substr(i+2,2))){toks.push({t:'text',v:hexChar(src.substr(i+2,2))});i+=4;continue;}
+        if(nx==='\\'||nx==='{'||nx==='}'){toks.push({t:'text',v:nx});i+=2;continue;}
+        var m=/^\\([a-zA-Z]+)(-?\d+)?[ ]?/.exec(src.slice(i));
+        if(m){toks.push({t:'ctrl',w:m[1],num:m[2]!==undefined?parseInt(m[2],10):null});i+=m[0].length;continue;}
+        i+=1;continue;
+      }
+      if(c==='{'){toks.push({t:'open'});i++;continue;}
+      if(c==='}'){toks.push({t:'close'});i++;continue;}
+      var j=i;while(j<n&&src[j]!=='\\'&&src[j]!=='{'&&src[j]!=='}')j++;
+      toks.push({t:'text',v:src.slice(i,j)});i=j;
+    }
+    return toks;
+  }
+
+  function renderSuper(buf){
+    var t=(buf||'').replace(/[\t\r\n]+/g,'  ').replace(/ {3,}/g,'  ').trim();
+    if(!t)return '';
+    if(/^[HG]\d/.test(t)){
+      var mm=/^((?:[HG]\d+ ?)+?)(?: {2,}([\s\S]*))?$/.exec(t);
+      var numsPart, morph='';
+      if(mm){numsPart=mm[1].trim();morph=(mm[2]||'').trim().replace(/\s+/g,' ');}
+      else{numsPart=t;}
+      var nums=numsPart.split(/\s+/).filter(Boolean);
+      var disp=nums.map(function(x){return x.replace(/^[HG]/,'');}).join('·');
+      return '<sup class="strong" data-s="'+escAttr(nums.join(' '))+'"'+(morph?(' data-m="'+escAttr(morph)+'"'):'')+' tabindex="0" role="button">'+disp+'</sup>';
+    }
+    return '<sup class="xref">'+esc(t.replace(/\s+/g,' '))+'</sup>';
+  }
+
+  function parse(scripture){
+    if(scripture==null)return{headings:[],body:''};
+    var src=String(scripture).replace(/\r/g,' ').trim();
+    var toks=tokenize(src);
+    var headings=[],body='',headBuf=null;
+    var stack=[{cf:0,ital:false,heading:false,isSuper:false,buf:null}];
+    function st(){return stack[stack.length-1];}
+    function activeSuper(){for(var i=stack.length-1;i>=0;i--){if(stack[i].isSuper)return stack[i];}return null;}
+    function emitText(txt){
+      var sup=activeSuper();
+      if(sup){sup.buf+=txt;return;}
+      var s2=st();
+      if(s2.heading){if(headBuf===null)headBuf='';headBuf+=esc(txt);return;}
+      if(!txt.length)return;
+      var pre='',post='';
+      if(s2.ital){pre+='<em>';post='</em>'+post;}
+      if(s2.cf===6){pre+='<span class="woc">';post='</span>'+post;}
+      body+=pre+esc(txt)+post;
+    }
+
+    for(var k=0;k<toks.length;k++){var tk=toks[k];
+      if(tk.t==='open'){var p=st();stack.push({cf:p.cf,ital:p.ital,heading:p.heading,isSuper:false,buf:null});}
+      else if(tk.t==='close'){
+        if(stack.length>1){var f=stack.pop();
+          if(f.isSuper){body+=renderSuper(f.buf);}
+          else if(f.heading && !st().heading){
+            if(headBuf!==null){var h=headBuf.replace(/\s*\u0001\s*/g,'<br>').trim().replace(/(<br>\s*)+$/,'').replace(/^(\s*<br>)+/,'');if(h)headings.push(h);headBuf=null;}
+          }
+        }
+      }
+      else if(tk.t==='ctrl'){var w=tk.w,s=st();
+        if(w==='qc'){s.heading=true;if(headBuf===null)headBuf='';}
+        else if(w==='cf'){s.cf=(tk.num===null?0:tk.num);}
+        else if(w==='super'){s.isSuper=true;if(s.buf===null)s.buf='';}
+        else if(w==='b'){}
+        else if(w==='i'){s.ital=(tk.num===0?false:true);}
+        else if(w==='bullet'){}
+        else if(w==='tab'){emitText(' ');}
+        else if(w==='par'||w==='p'){if(activeSuper()){}else if(s.heading){if(headBuf!==null)headBuf+='\u0001';}else{body+='<span class="pbrk"></span>';}}
+      }
+      else if(tk.t==='text'){emitText(tk.v);}
+    }
+    if(headBuf!==null){var h2=headBuf.replace(/\s*\u0001\s*/g,'<br>').trim().replace(/(<br>\s*)+$/,'');if(h2)headings.push(h2);}
+
+    var PB='<span class="pbrk"></span>';
+    while(body.indexOf(PB)===0)body=body.slice(PB.length).replace(/^\s+/,'');
+    while(body.length>=PB.length&&body.slice(-PB.length)===PB)body=body.slice(0,-PB.length).replace(/\s+$/,'');
+    body=body.replace(/\s{2,}/g,' ').replace(/^\s+/,'').replace(/\s+$/,'');
+    return{headings:headings,body:body};
+  }
+
+  function plain(scripture){
+    var p=parse(scripture);
+    return p.body.replace(/<sup[^>]*>[\s\S]*?<\/sup>/g,'').replace(/<[^>]+>/g,'')
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s{2,}/g,' ').trim();
+  }
+
+  var api={parse:parse,plain:plain};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;
+  root.RTF=api;
+})(typeof window!=='undefined'?window:globalThis);
+
+/* ======================= Datos canónicos ======================= */
+var BOOKS = [
+ [1,"Génesis","Gn","AT"],[2,"Éxodo","Éx","AT"],[3,"Levítico","Lv","AT"],[4,"Números","Nm","AT"],
+ [5,"Deuteronomio","Dt","AT"],[6,"Josué","Jos","AT"],[7,"Jueces","Jue","AT"],[8,"Rut","Rt","AT"],
+ [9,"1 Samuel","1S","AT"],[10,"2 Samuel","2S","AT"],[11,"1 Reyes","1R","AT"],[12,"2 Reyes","2R","AT"],
+ [13,"1 Crónicas","1Cr","AT"],[14,"2 Crónicas","2Cr","AT"],[15,"Esdras","Esd","AT"],[16,"Nehemías","Neh","AT"],
+ [17,"Ester","Est","AT"],[18,"Job","Job","AT"],[19,"Salmos","Sal","AT"],[20,"Proverbios","Pr","AT"],
+ [21,"Eclesiastés","Ec","AT"],[22,"Cantares","Cnt","AT"],[23,"Isaías","Is","AT"],[24,"Jeremías","Jer","AT"],
+ [25,"Lamentaciones","Lm","AT"],[26,"Ezequiel","Ez","AT"],[27,"Daniel","Dn","AT"],[28,"Oseas","Os","AT"],
+ [29,"Joel","Jl","AT"],[30,"Amós","Am","AT"],[31,"Abdías","Abd","AT"],[32,"Jonás","Jon","AT"],
+ [33,"Miqueas","Miq","AT"],[34,"Nahúm","Nah","AT"],[35,"Habacuc","Hab","AT"],[36,"Sofonías","Sof","AT"],
+ [37,"Hageo","Hag","AT"],[38,"Zacarías","Zac","AT"],[39,"Malaquías","Mal","AT"],
+ [40,"Mateo","Mt","NT"],[41,"Marcos","Mr","NT"],[42,"Lucas","Lc","NT"],[43,"Juan","Jn","NT"],
+ [44,"Hechos","Hch","NT"],[45,"Romanos","Ro","NT"],[46,"1 Corintios","1Co","NT"],[47,"2 Corintios","2Co","NT"],
+ [48,"Gálatas","Gá","NT"],[49,"Efesios","Ef","NT"],[50,"Filipenses","Fil","NT"],[51,"Colosenses","Col","NT"],
+ [52,"1 Tesalonicenses","1Ts","NT"],[53,"2 Tesalonicenses","2Ts","NT"],[54,"1 Timoteo","1Ti","NT"],
+ [55,"2 Timoteo","2Ti","NT"],[56,"Tito","Tit","NT"],[57,"Filemón","Flm","NT"],[58,"Hebreos","Heb","NT"],
+ [59,"Santiago","Stg","NT"],[60,"1 Pedro","1P","NT"],[61,"2 Pedro","2P","NT"],[62,"1 Juan","1Jn","NT"],
+ [63,"2 Juan","2Jn","NT"],[64,"3 Juan","3Jn","NT"],[65,"Judas","Jud","NT"],[66,"Apocalipsis","Ap","NT"]
+];
+var BOOKMAP={}; BOOKS.forEach(function(b){BOOKMAP[b[0]]={n:b[0],name:b[1],abbr:b[2],t:b[3]};});
+function bookName(n){return BOOKMAP[n]?BOOKMAP[n].name:('Libro '+n);}
+function bookAbbr(n){return BOOKMAP[n]?BOOKMAP[n].abbr:('L'+n);}
+function bookTest(n){return BOOKMAP[n]?BOOKMAP[n].t:(n<=39?'AT':'NT');}
+var HLCOLORS=['amber','rose','sky','mint','lilac'];
+var HLHEX={amber:'#F3D77E',rose:'#F2B8C6',sky:'#AFD6E8',mint:'#B7DEB6',lilac:'#D3C1E8'};
+
+/* ======================= Estado + persistencia ======================= */
+var VER={};                 // id -> {id,name,abbr, bimap:{bookN:{ch:[[raw]]}} , plainIndex? }
+var PRIMARY=null;           // id
+var COMPARE=[];             // ids adicionales
+var CUR={book:1, chapter:1};
+var STATE={
+  settings:{theme:'papel', redLetter:true, showXref:false, showStrong:false, fontStep:0, sbCollapsed:false, strongLang:'es'},
+  highlights:{},            // "b.c.v" -> colorId
+  notes:{},                 // "b.c.v" -> texto
+  apartados:[]              // [{id,name,color,items:[{b,c,v}],note}]
+};
+var LS='escudrinad.';
+function saveState(){
+  try{
+    localStorage.setItem(LS+'settings',JSON.stringify(STATE.settings));
+    localStorage.setItem(LS+'highlights',JSON.stringify(STATE.highlights));
+    localStorage.setItem(LS+'notes',JSON.stringify(STATE.notes));
+    localStorage.setItem(LS+'apartados',JSON.stringify(STATE.apartados));
+    localStorage.setItem(LS+'cur',JSON.stringify(CUR));
+    localStorage.setItem(LS+'view',JSON.stringify({primary:PRIMARY,compare:COMPARE}));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    var s=localStorage.getItem(LS+'settings'); if(s)Object.assign(STATE.settings,JSON.parse(s));
+    var h=localStorage.getItem(LS+'highlights'); if(h)STATE.highlights=JSON.parse(h)||{};
+    var n=localStorage.getItem(LS+'notes'); if(n)STATE.notes=JSON.parse(n)||{};
+    var a=localStorage.getItem(LS+'apartados'); if(a)STATE.apartados=JSON.parse(a)||[];
+    var c=localStorage.getItem(LS+'cur'); if(c)CUR=JSON.parse(c);
+  }catch(e){}
+}
+function vk(b,c,v){return b+'.'+c+'.'+v;}
+
+/* ======================= IndexedDB para versiones importadas ======================= */
+var IDB=null;
+function idbOpen(){
+  return new Promise(function(res){
+    var r=indexedDB.open('escudrinad_db',1);
+    r.onupgradeneeded=function(e){var db=e.target.result; if(!db.objectStoreNames.contains('versions'))db.createObjectStore('versions',{keyPath:'id'});};
+    r.onsuccess=function(e){IDB=e.target.result;res(IDB);};
+    r.onerror=function(){res(null);};
+  });
+}
+function idbPut(obj){return new Promise(function(res){if(!IDB)return res(false);var tx=IDB.transaction('versions','readwrite');tx.objectStore('versions').put(obj);tx.oncomplete=function(){res(true);};tx.onerror=function(){res(false);};});}
+function idbAll(){return new Promise(function(res){if(!IDB)return res([]);var tx=IDB.transaction('versions','readonly');var rq=tx.objectStore('versions').getAll();rq.onsuccess=function(){res(rq.result||[]);};rq.onerror=function(){res([]);};});}
+function idbDel(id){return new Promise(function(res){if(!IDB)return res(false);var tx=IDB.transaction('versions','readwrite');tx.objectStore('versions').delete(id);tx.oncomplete=function(){res(true);};tx.onerror=function(){res(false);};});}
+
+/* ======================= Registro de una versión en memoria ======================= */
+function registerVersion(data){
+  // data: {id,name,abbr,strong?,books:[{n,ch:[[raw]]}]}
+  var bimap={};
+  data.books.forEach(function(bk){bimap[bk.n]={ch:bk.ch};});
+  VER[data.id]={id:data.id,name:data.name,abbr:data.abbr,strong:!!data.strong,bimap:bimap,plainIndex:null};
+}
+
+/* ======================= Multi-versión: manifiesto + carga perezosa ======================= */
+var MANIFEST=null, BUNDLED={};
+function registerVersionMeta(e){
+  if(VER[e.id] && VER[e.id].bimap) return;   // ya cargada por completo; no pisar
+  VER[e.id]={id:e.id,name:e.name||e.id,abbr:e.abbr||e.id,strong:!!e.strong,bimap:null,meta:true,file:e.file,plainIndex:null};
+}
+function fileCandidates(file){
+  var bn=file.replace(/^.*\//,''); var arr=[file];
+  if(bn!==file)arr.push(bn);
+  if(arr.indexOf('data/'+bn)<0)arr.push('data/'+bn);
+  return arr.filter(function(x,i,a){return a.indexOf(x)===i;});
+}
+function loadManifest(){
+  return fetchFirstJson(['data/versions.json','versions.json']).then(function(m){
+    MANIFEST=m||null;
+    if(m&&m.versions&&m.versions.length){
+      m.versions.forEach(function(e){ if(e&&e.id&&e.file){ BUNDLED[e.id]=true; registerVersionMeta(e); } });
+    }
+    return m;
+  }).catch(function(){ MANIFEST=null; return null; });
+}
+function ensureVersionLoaded(id){
+  var V=VER[id];
+  if(V && V.bimap) return Promise.resolve(V);      // ya está completa
+  if(!V || !V.file) return Promise.reject(new Error('versión no disponible'));
+  if(V._loading) return V._loading;
+  V._loading=fetchFirstJson(fileCandidates(V.file)).then(function(data){
+    data.id=id; if(!data.abbr)data.abbr=V.abbr; if(!data.name)data.name=V.name; data.strong=(data.strong!==undefined?data.strong:V.strong);
+    registerVersion(data); return VER[id];
+  });
+  return V._loading;
+}
+function getVerseRaw(id,b,c,v){
+  var V=VER[id]; if(!V||!V.bimap||!V.bimap[b])return null;
+  var ch=V.bimap[b].ch[c-1]; if(!ch)return null;
+  return ch[v-1]!==undefined?ch[v-1]:null;
+}
+function chapterCount(id,b){var V=VER[id];return (V&&V.bimap&&V.bimap[b])?V.bimap[b].ch.length:0;}
+function verseCount(id,b,c){var V=VER[id];if(!V||!V.bimap||!V.bimap[b])return 0;var ch=V.bimap[b].ch[c-1];return ch?ch.length:0;}
+function booksOf(id){var V=VER[id];return (V&&V.bimap)?Object.keys(V.bimap).map(Number).sort(function(a,b){return a-b;}):[];}
+
+/* Índice de texto plano (para búsqueda/análisis) — perezoso y cacheado */
+function buildPlainIndex(id){
+  var V=VER[id]; if(!V)return null; if(V.plainIndex)return V.plainIndex;
+  var idx=[]; var books=booksOf(id);
+  for(var bi=0;bi<books.length;bi++){var b=books[bi];var chs=V.bimap[b].ch;
+    for(var c=0;c<chs.length;c++){var vs=chs[c];
+      for(var v=0;v<vs.length;v++){var raw=vs[v]; if(raw==='')continue;
+        idx.push({b:b,c:c+1,v:v+1,t:RTF.plain(raw)});}}}
+  V.plainIndex=idx; return idx;
+}
+
+/* ======================= Utilidades DOM ======================= */
+function $(s,r){return (r||document).querySelector(s);}
+function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on');},1900);}
+function normalize(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+
+/* ======================= Render de lectura ======================= */
+function applyBodyClasses(){
+  document.body.classList.toggle('redletter',!!STATE.settings.redLetter);
+  document.body.classList.toggle('showxref',!!STATE.settings.showXref);
+  document.body.classList.toggle('showstrong',!!STATE.settings.showStrong);
+  document.body.classList.remove('sepia','night');
+  if(STATE.settings.theme==='sepia')document.body.classList.add('sepia');
+  if(STATE.settings.theme==='noche')document.body.classList.add('night');
+  document.body.classList.toggle('compare',COMPARE.length>0);
+  document.body.classList.toggle('sb-collapsed',!!STATE.settings.sbCollapsed);
+  var sbt=$('#sbToggle'); if(sbt){sbt.textContent=STATE.settings.sbCollapsed?'\u203A':'\u2039'; sbt.title=STATE.settings.sbCollapsed?'Mostrar el panel':'Ocultar el panel';}
+  var base=19+STATE.settings.fontStep*1.5;
+  document.documentElement.style.setProperty('--reading-size',base+'px');
+}
+
+function renderReader(){
+  applyBodyClasses();
+  var reader=$('#reader');
+  if(COMPARE.length>0){renderCompare(reader);}
+  else{renderSingle(reader);}
+  updateChNav();
+}
+
+function renderSingle(reader){
+  var id=PRIMARY, b=CUR.book, c=CUR.chapter;
+  if(!VER[id]){reader.innerHTML='<div class="reading"><div class="empty">No hay versión cargada.</div></div>';return;}
+  var nverses=verseCount(id,b,c);
+  var html='<div class="reading"><div class="chapter-head"><div class="bk">'+bookName(b)+'</div>'+
+           '<div class="cn"><small>Capítulo</small>'+c+'</div></div>';
+  if(nverses===0){html+='<div class="empty">Este capítulo no existe en '+VER[id].abbr+'.</div></div>';reader.innerHTML=html;return;}
+  for(var v=1;v<=nverses;v++){
+    var raw=getVerseRaw(id,b,c,v); if(raw===null){continue;}
+    var p=RTF.parse(raw);
+    p.headings.forEach(function(h){html+='<div class="pericope">'+h+'</div>';});
+    var key=vk(b,c,v);
+    var hl=STATE.highlights[key]; var hlcls=hl?(' hl-'+hl):'';
+    var note=STATE.notes[key];
+    var noteflag=note?'<span class="noteflag" title="Ver nota" data-note="'+key+'">✎</span>':'';
+    var apflags=apFlagsFor(b,c,v);
+    html+='<span class="v'+hlcls+'" id="v-'+v+'" data-b="'+b+'" data-c="'+c+'" data-v="'+v+'">'+
+          '<span class="vn" data-vn="'+v+'">'+v+'</span>'+
+          '<span class="vt">'+(p.body||'')+'</span>'+noteflag+apflags+' </span>';
+  }
+  html+='</div>';
+  reader.innerHTML=html;
+  reader.scrollTop=0;
+}
+
+function apFlagsFor(b,c,v){
+  var out='';
+  STATE.apartados.forEach(function(ap){
+    if(ap.items.some(function(it){return it.b===b&&it.c===c&&it.v===v;})){
+      out+='<span class="apflag" title="'+escAttr(ap.name)+'" style="color:'+(HLHEX[ap.color]||'#B5893C')+'">◆</span>';
+    }
+  });
+  return out;
+}
+function escAttr(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function renderCompare(reader){
+  var ids=[PRIMARY].concat(COMPARE);
+  var b=CUR.book, c=CUR.chapter;
+  // número de versículos: el máximo entre versiones
+  var maxv=0; ids.forEach(function(id){maxv=Math.max(maxv,verseCount(id,b,c));});
+  var cols='60px '+ids.map(function(){return '1fr';}).join(' ');
+  var html='<div class="reading"><div class="chapter-head"><div class="bk">'+bookName(b)+'</div>'+
+           '<div class="cn"><small>Capítulo</small>'+c+'</div></div>';
+  if(maxv===0){html+='<div class="empty">Capítulo no disponible.</div></div>';reader.innerHTML=html;return;}
+  html+='<div class="cmp-head cmp-row" style="grid-template-columns:'+cols+'">'+
+        '<div class="cmp-vn">v.</div>'+ids.map(function(id){return '<div class="cmp-cell">'+escAttr(VER[id].abbr)+'</div>';}).join('')+'</div>';
+  for(var v=1;v<=maxv;v++){
+    var key=vk(b,c,v); var hl=STATE.highlights[key]; var hlcls=hl?(' hl-'+hl):'';
+    html+='<div class="cmp-row'+hlcls+'" data-b="'+b+'" data-c="'+c+'" data-v="'+v+'" style="grid-template-columns:'+cols+'">'+
+          '<div class="cmp-vn" data-vn="'+v+'">'+v+'</div>';
+    ids.forEach(function(id){
+      var raw=getVerseRaw(id,b,c,v);
+      var body=(raw===null||raw==='')?'<span style="color:var(--sand)">—</span>':RTF.parse(raw).body;
+      html+='<div class="cmp-cell">'+body+'</div>';
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+  reader.innerHTML=html;
+  reader.scrollTop=0;
+}
+
+/* ======================= Navegación (sidebar Libros) ======================= */
+var navTest='AT';
+function renderBookList(){
+  var wrap=$('#booklist'); wrap.innerHTML='';
+  BOOKS.filter(function(b){return b[3]===navTest;}).forEach(function(b){
+    var avail=PRIMARY&&VER[PRIMARY]&&VER[PRIMARY].bimap[b[0]];
+    var btn=document.createElement('button');
+    btn.className='book-b'+(b[0]===CUR.book?' on':''); btn.textContent=b[1];
+    btn.title=b[1]; if(!avail)btn.style.opacity=.4;
+    btn.onclick=function(){CUR.book=b[0];CUR.chapter=1;renderChapters();renderBookList();renderReader();saveState();closeNavMobile();};
+    wrap.appendChild(btn);
+  });
+  $all('.testament-row button').forEach(function(x){x.classList.toggle('on',x.dataset.t===navTest);});
+}
+function renderChapters(){
+  var grid=$('#chaptergrid'); grid.innerHTML='';
+  var n=PRIMARY?chapterCount(PRIMARY,CUR.book):0;
+  $('#chapTitle').style.display=n?'block':'none';
+  for(var c=1;c<=n;c++){(function(c){
+    var btn=document.createElement('button');
+    btn.className='chap-b'+(c===CUR.chapter?' on':''); btn.textContent=c;
+    btn.onclick=function(){CUR.chapter=c;renderChapters();renderReader();saveState();closeNavMobile();};
+    grid.appendChild(btn);
+  })(c);}
+}
+function closeNavMobile(){ if(window.innerWidth<=860)document.body.classList.add('nav-closed'); }
+
+/* ======================= Navegación de capítulos (flechas) ======================= */
+function changeChapter(dir){
+  var id=PRIMARY; if(!id||!VER[id])return;
+  var b=CUR.book, c=CUR.chapter, n=chapterCount(id,b), nc=c+dir;
+  if(nc>=1 && nc<=n){ CUR.chapter=nc; }
+  else{
+    var books=booksOf(id), idx=books.indexOf(b);
+    if(dir>0){ if(idx<books.length-1){CUR.book=books[idx+1];CUR.chapter=1;} else return; }
+    else     { if(idx>0){CUR.book=books[idx-1];CUR.chapter=chapterCount(id,books[idx-1]);} else return; }
+  }
+  renderChapters(); renderBookList(); renderReader(); saveState();
+}
+function updateChNav(){
+  var pv=$('#chPrev'), nx=$('#chNext'); if(!pv||!nx)return;
+  var id=PRIMARY;
+  if(!id||!VER[id]){pv.disabled=true;nx.disabled=true;return;}
+  var books=booksOf(id), idx=books.indexOf(CUR.book), n=chapterCount(id,CUR.book);
+  pv.disabled=(idx<=0 && CUR.chapter<=1);
+  nx.disabled=(idx>=books.length-1 && CUR.chapter>=n);
+}
+
+/* ======================= Selección de versículo + barra ======================= */
+var SELECTED=null; // {b,c,v}
+function selectVerse(b,c,v,anchorEl){
+  SELECTED={b:b,c:c,v:v};
+  $all('.v.sel').forEach(function(e){e.classList.remove('sel');});
+  if(anchorEl&&anchorEl.classList.contains('v'))anchorEl.classList.add('sel');
+  var bar=$('#vbar');
+  $('#vbarRef').textContent=bookAbbr(b)+' '+c+':'+v;
+  bar.classList.add('on');
+  var r=anchorEl.getBoundingClientRect();
+  var bw=bar.offsetWidth||320, bh=bar.offsetHeight||44;
+  var top=r.top-bh-8; if(top<8)top=r.bottom+8;
+  var left=Math.min(Math.max(8,r.left),window.innerWidth-bw-8);
+  bar.style.top=top+'px'; bar.style.left=left+'px';
+}
+function closeVbar(){$('#vbar').classList.remove('on');$all('.v.sel').forEach(function(e){e.classList.remove('sel');});SELECTED=null;}
+
+function buildSwatches(){
+  var w=$('#vbarSwatches'); w.innerHTML='';
+  HLCOLORS.forEach(function(col){
+    var s=document.createElement('div'); s.className='swatch'; s.style.background=HLHEX[col]; s.title='Subrayar';
+    s.onclick=function(){setHighlight(col);}; w.appendChild(s);
+  });
+  var clr=document.createElement('div'); clr.className='swatch clear'; clr.title='Quitar subrayado';
+  clr.onclick=function(){setHighlight(null);}; w.appendChild(clr);
+}
+function setHighlight(col){
+  if(!SELECTED)return; var key=vk(SELECTED.b,SELECTED.c,SELECTED.v);
+  if(col)STATE.highlights[key]=col; else delete STATE.highlights[key];
+  saveState(); renderReader();
+  toast(col?'Subrayado':'Subrayado quitado');
+}
+
+/* ======================= Búsqueda ======================= */
+function runSearch(opts){
+  var id=PRIMARY; if(!VER[id]){toast('Carga una versión primero');return;}
+  var idx=buildPlainIndex(id);
+  var main=opts.main.trim(); if(!main){$('#searchResults').innerHTML='';$('#searchMeta').textContent='';return;}
+  var excl=(opts.excl||'').trim();
+  var cs=opts.matchCase, whole=opts.wholeWord;
+  var scope=opts.scope;
+  var mode=opts.mode;
+
+  function prep(s){return cs?s:normalize(s);}
+  var terms = mode==='phrase' ? [main] : main.split(/\s+/).filter(Boolean);
+  var pterms = terms.map(prep);
+  var pexcl = excl?excl.split(/\s+/).filter(Boolean).map(prep):[];
+
+  function makeRe(t){var esc=t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp(whole?('(^|[^\\p{L}\\p{N}])('+esc+')(?![\\p{L}\\p{N}])'):('('+esc+')'),cs?'u':'iu');}
+  var res=[]; var perBook={}; var total=0;
+
+  for(var i=0;i<idx.length;i++){var row=idx[i];
+    if(scope==='AT'&&bookTest(row.b)!=='AT')continue;
+    if(scope==='NT'&&bookTest(row.b)!=='NT')continue;
+    if(scope==='book'&&row.b!==CUR.book)continue;
+    var hay=prep(row.t);
+    // excluir
+    var skip=false; for(var e=0;e<pexcl.length;e++){if(hay.indexOf(pexcl[e])>=0){skip=true;break;}} if(skip)continue;
+    var ok=false, count=0;
+    if(mode==='any'){ for(var a=0;a<pterms.length;a++){ if(matchTerm(hay,pterms[a],whole)){ok=true;} } }
+    else { ok=true; for(var b2=0;b2<pterms.length;b2++){ if(!matchTerm(hay,pterms[b2],whole)){ok=false;break;} } }
+    if(!ok)continue;
+    // conteo aproximado de ocurrencias del primer término
+    count=countTerm(hay,pterms[0],whole)||1;
+    total+=count; perBook[row.b]=(perBook[row.b]||0)+count;
+    if(res.length<400){ res.push({b:row.b,c:row.c,v:row.v,snip:snippet(row.t,terms[0],cs,whole)}); }
+  }
+  renderSearchResults(res,total,perBook,main);
+}
+function matchTerm(hay,term,whole){
+  if(!whole)return hay.indexOf(term)>=0;
+  var esc=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return new RegExp('(^|[^\\p{L}\\p{N}])'+esc+'(?![\\p{L}\\p{N}])','u').test(hay);
+}
+function countTerm(hay,term,whole){
+  if(!term)return 0;
+  var esc=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  var re=new RegExp(whole?('(?:^|[^\\p{L}\\p{N}])'+esc+'(?![\\p{L}\\p{N}])'):esc,'gu');
+  var m=hay.match(re); return m?m.length:0;
+}
+function snippet(text,term,cs,whole){
+  var hayN=cs?text:normalize(text); var t=cs?term:normalize(term);
+  var pos=hayN.indexOf(t); if(pos<0)pos=0;
+  var start=Math.max(0,pos-38), end=Math.min(text.length,pos+t.length+42);
+  var seg=(start>0?'…':'')+text.slice(start,end)+(end<text.length?'…':'');
+  // marca todas las apariciones del término
+  try{
+    var esc=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    var re=new RegExp(whole?('('+esc+')'):('('+esc+')'), cs?'g':'giu');
+    seg=seg.replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});
+    seg=seg.replace(re,'<mark>$1</mark>');
+  }catch(e){}
+  return seg;
+}
+function renderSearchResults(res,total,perBook,term){
+  var meta=$('#searchMeta');
+  meta.innerHTML=res.length?(total+' apariciones en '+Object.keys(perBook).length+' libros · mostrando '+res.length):'Sin resultados.';
+  var wrap=$('#searchResults'); wrap.innerHTML='';
+  if(!res.length)return;
+  // barras por libro
+  var books=Object.keys(perBook).map(Number).sort(function(a,b){return perBook[b]-perBook[a];}).slice(0,12);
+  var mx=Math.max.apply(null,books.map(function(b){return perBook[b];}));
+  var bars=document.createElement('div'); bars.className='bookbars';
+  books.forEach(function(b){
+    var row=document.createElement('div'); row.className='bookbar';
+    row.innerHTML='<div class="bn">'+bookName(b)+'</div><div class="track"><div class="fill" style="width:'+(perBook[b]/mx*100)+'%"></div></div><div class="cnt">'+perBook[b]+'</div>';
+    bars.appendChild(row);
+  });
+  wrap.appendChild(bars);
+  var hr=document.createElement('h4'); hr.textContent='Versículos'; wrap.appendChild(hr);
+  res.forEach(function(r){
+    var d=document.createElement('div'); d.className='result';
+    d.innerHTML='<div class="ref">'+bookAbbr(r.b)+' '+r.c+':'+r.v+'</div><div class="snip">'+r.snip+'</div>';
+    d.onclick=function(){goTo(r.b,r.c,r.v);};
+    wrap.appendChild(d);
+  });
+}
+function goTo(b,c,v){
+  CUR.book=b; CUR.chapter=c; renderBookList(); renderChapters(); renderReader(); saveState();
+  setTimeout(function(){var el=$('#v-'+v);if(el){el.scrollIntoView({block:'center'});el.classList.add('flash');setTimeout(function(){el.classList.remove('flash');},1400);}},60);
+  closeNavMobile();
+}
+
+/* ======================= Análisis ======================= */
+// Mapea, en un versículo del módulo Strong, cada palabra -> el número Strong que la sigue.
+function hexCharA(hh){var n=parseInt(hh,16);var t={0xab:'«',0xbb:'»'};return t[n]||String.fromCharCode(n);}
+function strongWordMap(raw){
+  if(raw==null)return [];
+  var words=[], cur='';
+  function flush(){ if(cur.length){ words.push({disp:cur, w:normalize(cur), codes:[], morph:''}); cur=''; } }
+  function addText(t){ for(var k=0;k<t.length;k++){var ch=t[k];
+    if(/[\s.,;:!?«»"'()\[\]¿¡—–]/.test(ch)){ flush(); } else { cur+=ch; } } }
+  function assign(codes,morph){ flush(); if(words.length){var last=words[words.length-1]; if(!last.codes.length){last.codes=codes;last.morph=morph;}} }
+  function walk(str){var i=0,n=str.length;
+    while(i<n){var c=str[i];
+      if(c==='{'){var j=i,depth=0; for(;j<n;j++){if(str[j]==='{')depth++;else if(str[j]==='}'){depth--;if(depth===0){j++;break;}}}
+        var inner=str.slice(i+1,j-1);
+        if(/^\s*(\\cf\d+\s*)?\\super\s*[HG]\d/.test(inner)){
+          var st=inner.replace(/^\s*(\\cf\d+\s*)?\\super\s*/,'').replace(/[\t\r\n]+/g,'  ').trim();
+          var mm=/^((?:[HG]\d+ ?)+?)(?: {2,}([\s\S]*))?$/.exec(st);
+          var nums=mm?mm[1].trim().split(/\s+/):(/^[HG]\d/.test(st)?[st.split(/\s+/)[0]]:[]);
+          var morph=mm&&mm[2]?mm[2].trim().replace(/\s+/g,' '):'';
+          if(nums.length)assign(nums,morph);
+        } else if(/^\s*(\\cf\d+\s*)?\\super\b/.test(inner)){/* xref: {\super\cf6 (A)} */}
+        else if(/^\s*\\qc\b/.test(inner)){/* título */}
+        else { walk(inner); }   // contenedor (rojo {\cf6 …}, etc.): procesar su interior
+        i=j; continue;
+      }
+      if(c==='\\'){
+        var mh=/^\\'([0-9a-fA-F]{2})/.exec(str.slice(i)); if(mh){addText(hexCharA(mh[1]));i+=4;continue;}
+        var me=/^\\([\\{}])/.exec(str.slice(i)); if(me){addText(me[1]);i+=2;continue;}
+        var mc=/^\\([a-zA-Z]+)(-?\d+)?[ ]?/.exec(str.slice(i)); if(mc){if(mc[1]==='tab')addText(' ');i+=mc[0].length;continue;}
+        i++; continue;
+      }
+      var k2=i; while(k2<n && str[k2]!=='\\' && str[k2]!=='{' && str[k2]!=='}') k2++;
+      addText(str.slice(i,k2)); i=k2;
+    }
+  }
+  walk(String(raw)); flush(); return words;
+}
+function firstLoadedStrong(){
+  if(VER[PRIMARY]&&VER[PRIMARY].strong&&VER[PRIMARY].bimap)return PRIMARY;
+  if(VER['RV1960S']&&VER['RV1960S'].bimap&&VER['RV1960S'].strong)return 'RV1960S';
+  for(var id in VER){if(VER[id]&&VER[id].strong&&VER[id].bimap)return id;} return null;
+}
+function manifestStrongId(){ if(firstLoadedStrong())return null;
+  for(var id in VER){if(VER[id]&&VER[id].strong)return id;} return null; }
+
+var STOP={'el':1,'la':1,'los':1,'las':1,'de':1,'del':1,'y':1,'a':1,'en':1,'que':1,'e':1,'o':1,'u':1,'un':1,'una':1,'unos':1,'unas':1,'al':1,'se':1,'su':1,'sus':1,'lo':1,'le':1,'les':1,'me':1,'te':1,'nos':1,'con':1,'por':1,'para':1,'no':1,'si':1,'mi':1,'tu':1,'es':1,'son':1,'fue':1,'ha':1,'han':1,'como':1,'mas':1,'pero':1,'porque':1,'sino':1,'ni':1,'yo':1,'el':1,'ellos':1,'ella':1,'esto':1,'esta':1,'este':1,'aquel':1,'sobre':1,'entre':1,'desde':1,'hasta':1,'cuando':1,'donde':1,'quien':1,'cual':1,'toda':1,'todo':1,'todos':1,'todas':1};
+
+function runAnalysis(term,whole){
+  var baseId=firstLoadedStrong()||PRIMARY;
+  if(!VER[baseId]){toast('Carga una versión');return;}
+  term=term.trim(); var wrap=$('#anaResult'); wrap.innerHTML='';
+  if(!term)return;
+  var pt=normalize(term);
+  var idx=buildPlainIndex(baseId);
+  var perBook={}, perTest={AT:0,NT:0}, verses=0, total=0, hits=[], first=null, last=null;
+  for(var i=0;i<idx.length;i++){var row=idx[i];var hay=normalize(row.t);
+    var cnt=countTerm(hay,pt,whole);
+    if(cnt>0){verses++; total+=cnt; perBook[row.b]=(perBook[row.b]||0)+cnt; perTest[bookTest(row.b)]+=cnt;
+      hits.push(row); if(!first)first=row; last=row;}}
+  if(total===0){wrap.innerHTML='<p class="empty">«'+escAttr(term)+'» no aparece.</p>';return;}
+
+  // --- Resumen ---
+  var head=document.createElement('div'); head.className='ana-summary';
+  head.innerHTML='<div class="ana-big">'+total+'</div><div class="ana-sub">apariciones en '+verses+' versículos</div>'+
+    '<div class="ana-grid">'+
+      '<div><span>Antiguo T.</span><b>'+perTest.AT+'</b></div>'+
+      '<div><span>Nuevo T.</span><b>'+perTest.NT+'</b></div>'+
+      '<div><span>Libros</span><b>'+Object.keys(perBook).length+'</b></div>'+
+      '<div><span>Primera</span><b>'+bookAbbr(first.b)+' '+first.c+':'+first.v+'</b></div>'+
+      '<div><span>Última</span><b>'+bookAbbr(last.b)+' '+last.c+':'+last.v+'</b></div>'+
+    '</div>';
+  wrap.appendChild(head);
+
+  // --- Léxico Strong (detrás del término) ---
+  var sid=firstLoadedStrong();
+  var lexBox=document.createElement('div'); lexBox.className='ana-section';
+  if(sid){
+    lexBox.innerHTML='<h4>Palabra original (Strong)</h4><div id="anaLex"><p class="empty">Analizando léxico…</p></div>';
+    wrap.appendChild(lexBox);
+    analyzeLexicon(sid, hits, pt, whole);
+  } else if(manifestStrongId()){
+    lexBox.innerHTML='<h4>Palabra original (Strong)</h4>';
+    var b=document.createElement('button'); b.className='btn ghost sm'; b.textContent='Cargar versión con Strong para el análisis léxico';
+    b.onclick=function(){var mid=manifestStrongId(); toast('Cargando…'); ensureVersionLoaded(mid).then(function(){runAnalysis(term,whole);});};
+    lexBox.appendChild(b); wrap.appendChild(lexBox);
+  }
+
+  // --- Distribución por libro ---
+  var distBox=document.createElement('div'); distBox.className='ana-section';
+  distBox.innerHTML='<h4>Distribución por libro</h4>';
+  var books=Object.keys(perBook).map(Number).sort(function(a,b){return perBook[b]-perBook[a];});
+  var mx=Math.max.apply(null,books.map(function(b){return perBook[b];}));
+  var bars=document.createElement('div'); bars.className='bookbars';
+  books.forEach(function(b){var row=document.createElement('div');row.className='bookbar';
+    row.innerHTML='<div class="bn">'+bookName(b)+'</div><div class="track"><div class="fill" style="width:'+(perBook[b]/mx*100)+'%"></div></div><div class="cnt">'+perBook[b]+'</div>';
+    row.style.cursor='pointer'; row.onclick=function(){goTo(b,1,1);}; bars.appendChild(row);});
+  distBox.appendChild(bars); wrap.appendChild(distBox);
+
+  // --- Colocaciones ---
+  var col={};
+  for(var h=0;h<hits.length;h++){var toks=normalize(hits[h].t).split(/[^a-z0-9]+/);
+    for(var w=0;w<toks.length;w++){var tk=toks[w]; if(!tk||tk.length<3||STOP[tk]||tk===pt||(whole?false:tk.indexOf(pt)>=0))continue; col[tk]=(col[tk]||0)+1;}}
+  var colArr=Object.keys(col).map(function(k){return [k,col[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,14);
+  if(colArr.length){var colBox=document.createElement('div'); colBox.className='ana-section';
+    colBox.innerHTML='<h4>Aparece junto a</h4>';
+    var chips=document.createElement('div'); chips.className='collocs';
+    colArr.forEach(function(p){var c=document.createElement('button'); c.className='colchip'; c.innerHTML=escAttr(p[0])+'<span>'+p[1]+'</span>';
+      c.onclick=function(){$('#anaTerm').value=p[0];runAnalysis(p[0],true);}; chips.appendChild(c);});
+    colBox.appendChild(chips); wrap.appendChild(colBox);}
+
+  // --- Contexto (concordancia) ---
+  var ctxBox=document.createElement('div'); ctxBox.className='ana-section';
+  ctxBox.innerHTML='<h4>Contexto ('+Math.min(hits.length,80)+' de '+verses+')</h4>';
+  var list=document.createElement('div'); list.className='kwic';
+  var re=new RegExp('('+pt.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')', whole?'gi':'gi');
+  hits.slice(0,80).forEach(function(row){var d=document.createElement('div'); d.className='kwic-row';
+    var plain=row.t; var hl=highlightTerm(plain, pt, whole);
+    d.innerHTML='<span class="kref">'+bookAbbr(row.b)+' '+row.c+':'+row.v+'</span> <span class="ktext">'+hl+'</span>';
+    d.onclick=function(){goTo(row.b,row.c,row.v);}; list.appendChild(d);});
+  ctxBox.appendChild(list); wrap.appendChild(ctxBox);
+
+  var btn=document.createElement('button'); btn.className='btn ghost sm'; btn.style.marginTop='6px'; btn.textContent='Ver en Buscar';
+  btn.onclick=function(){switchTab('search');$('#qMain').value=term;$('#qWord').checked=whole;$('#qMode').value='all';$('#qScope').value='all';$('#doSearch').click();};
+  wrap.appendChild(btn);
+}
+
+// Resalta el término (por palabra normalizada) dentro de un texto plano
+function highlightTerm(plain, pt, whole){
+  var out='', toks=plain.split(/(\s+)/);
+  for(var i=0;i<toks.length;i++){var t=toks[i];
+    if(/^\s+$/.test(t)){out+=t;continue;}
+    var n=normalize(t.replace(/[^\wáéíóúñü]/gi,''));
+    var m = whole? (n===pt) : (n.indexOf(pt)>=0);
+    out+= m ? ('<b class="khit">'+escAttr(t)+'</b>') : escAttr(t);
+  }
+  return out;
+}
+
+// Agrupa las apariciones por número Strong (palabra original detrás del término)
+function analyzeLexicon(sid, hits, pt, whole){
+  loadStrongs().then(function(dict){
+    var groups={}, withStrong=0, noStrong=0;
+    for(var h=0;h<hits.length;h++){var row=hits[h];
+      var raw=getVerseRaw(sid,row.b,row.c,row.v); if(!raw)continue;
+      var wm=strongWordMap(raw);
+      for(var i=0;i<wm.length;i++){var wd=wm[i];
+        var match = whole? (wd.w===pt) : (wd.w.indexOf(pt)>=0);
+        if(!match)continue;
+        if(wd.codes.length){ var key=wd.codes.join(' ');
+          if(!groups[key])groups[key]={codes:wd.codes,count:0,morphs:{},refs:[]};
+          groups[key].count++; if(wd.morph)groups[key].morphs[wd.morph]=(groups[key].morphs[wd.morph]||0)+1;
+          if(groups[key].refs.length<50)groups[key].refs.push(row);
+          withStrong++;
+        } else noStrong++;
+      }
+    }
+    var host=$('#anaLex'); if(!host)return;
+    var arr=Object.keys(groups).map(function(k){return groups[k];}).sort(function(a,b){return b.count-a.count;});
+    if(!arr.length){host.innerHTML='<p class="empty">No se hallaron números Strong asociados a «'+escAttr(pt)+'».</p>';return;}
+    var totalWS=withStrong||1;
+    var html='<p class="lex-note">La palabra que buscas traduce, en el original, estas palabras (por frecuencia):</p>';
+    arr.forEach(function(g){
+      var primary=g.codes[0], e=dict[primary]||{}, isGreek=primary[0]==='G';
+      var pct=Math.round(g.count/totalWS*100);
+      var morphTop=Object.keys(g.morphs).sort(function(a,b){return g.morphs[b]-g.morphs[a];})[0]||'';
+      html+='<div class="lexcard" data-codes="'+escAttr(g.codes.join(' '))+'">'+
+        '<div class="lexcard-h">'+
+          '<span class="lex-word'+(isGreek?'':' rtl')+'">'+escAttr(e.w||'—')+'</span>'+
+          '<span class="lex-code '+(isGreek?'gr':'')+'">'+escAttr(g.codes.join('+'))+'</span>'+
+          (e.x?'<span class="lex-translit">'+escAttr(e.x)+'</span>':'')+
+          '<span class="lexcard-count">'+g.count+' <small>('+pct+'%)</small></span>'+
+        '</div>'+
+        (e.d?'<div class="lexcard-def">'+escAttr(e.d)+'</div>':'')+
+        (morphTop?('<div class="lexcard-morph">'+escAttr(morphTop)+(describeMorph(morphTop,isGreek)?(' · '+describeMorph(morphTop,isGreek)):'')+'</div>'):'')+
+      '</div>';
+    });
+    if(noStrong)html+='<p class="lex-note" style="margin-top:8px">('+noStrong+' aparición(es) sin número Strong directo, p. ej. palabras añadidas.)</p>';
+    host.innerHTML=html;
+    $all('.lexcard',host).forEach(function(card){card.style.cursor='pointer';
+      card.onclick=function(){openStrongPopup(card.getAttribute('data-codes'),'');};});
+  }).catch(function(){var host=$('#anaLex'); if(host)host.innerHTML='<p class="empty">No se pudo cargar el léxico.</p>';});
+}
+
+/* ======================= Ley de Cristo ======================= */
+var LEY=null, LEY_LOADING=null;
+function loadLey(){
+  if(LEY)return Promise.resolve(LEY);
+  if(LEY_LOADING)return LEY_LOADING;
+  LEY_LOADING=fetchFirstJson(['data/ley_cristo.json','ley_cristo.json']).then(function(d){LEY=d;return d;});
+  return LEY_LOADING;
+}
+function openLey(){
+  var host=$('#leyBody');
+  loadLey().then(function(d){ renderLey(d, $('#leyFilter').value.trim()); })
+    .catch(function(){ if(host)host.innerHTML='<p class="empty">No se pudo cargar la Ley de Cristo (data/ley_cristo.json).</p>'; });
+}
+function renderLey(d, filter){
+  var host=$('#leyBody'); if(!host)return;
+  var f=filter?normalize(filter):'';
+  var html=''; var shown=0;
+  d.sections.forEach(function(sec,si){
+    var items=sec.items;
+    if(f){ items=items.filter(function(it){
+      if(normalize(it.text).indexOf(f)>=0)return true;
+      return it.refs.some(function(r){return normalize(r.t).indexOf(f)>=0;});
+    }); }
+    if(!items.length)return;
+    shown+=items.length;
+    var open = f ? true : (si===0);
+    html+='<div class="ley-sec'+(open?' open':'')+'" data-sec="'+si+'">'+
+      '<div class="ley-sec-h"><span class="cx">'+escAttr(sec.id)+'</span>'+
+        '<span class="tt">'+escAttr(sec.title)+'</span>'+
+        '<span class="ct">'+items.length+'</span><span class="ar">▸</span></div>'+
+      '<div class="ley-sec-body">';
+    items.forEach(function(it){
+      html+='<div class="ley-item'+(it.jesus?' jesus':'')+'">'+
+        '<div class="ln"><span class="num">'+it.n+'.</span>'+
+        '<span class="tx">'+escAttr(it.text)+
+          (it.jesus?'<span class="ley-badge">Jesús</span>':'')+
+          (it.debated?'<span class="ley-dbadge">debatido</span>':'')+
+          (it.note?('<span class="ley-note">'+escAttr(it.note)+'</span>'):'')+
+        '</span></div>'+
+        '<div class="ley-refs">'+
+          it.refs.map(function(r){return '<button class="ref-chip" data-b="'+r.b+'" data-c="'+r.c+'" data-v="'+r.v+'">'+escAttr(r.t)+'</button>';}).join('')+
+        '</div>'+
+      '</div>';
+    });
+    html+='</div></div>';
+  });
+  if(!shown)html='<p class="empty">Sin resultados para «'+escAttr(filter)+'».</p>';
+  host.innerHTML=html;
+  $all('.ley-sec-h',host).forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle('open');};});
+  $all('.ref-chip',host).forEach(function(b){b.onclick=function(){
+    goToRef(+b.getAttribute('data-b'), +b.getAttribute('data-c'), +b.getAttribute('data-v'));
+  };});
+}
+function goToRef(b,c,v){
+  if(!VER[PRIMARY]||!VER[PRIMARY].bimap||!VER[PRIMARY].bimap[b]){ toast('Ese libro no está en la versión activa'); return; }
+  goTo(b,c,v);
+  closeNavMobile();
+}
+
+/* ======================= Strong: léxico + morfología + cuadro ======================= */
+var STRONGS=null, STRONGS_LOADING=null;
+function loadStrongs(){
+  if(STRONGS)return Promise.resolve(STRONGS);
+  if(STRONGS_LOADING)return STRONGS_LOADING;
+  STRONGS_LOADING=fetchFirstJson(['data/strongs.json','strongs.json']).then(function(d){STRONGS=d;return d;});
+  return STRONGS_LOADING;
+}
+var STRONGS_ES=null, STRONGS_ES_LOADING=null, STRONGS_ES_FAILED=false;
+function loadStrongsEs(){
+  if(STRONGS_ES)return Promise.resolve(STRONGS_ES);
+  if(STRONGS_ES_FAILED)return Promise.resolve(null);
+  if(STRONGS_ES_LOADING)return STRONGS_ES_LOADING;
+  STRONGS_ES_LOADING=fetchFirstJson(['data/strongs_es.json','strongs_es.json'])
+    .then(function(d){STRONGS_ES=d;return d;})
+    .catch(function(){STRONGS_ES_FAILED=true;return null;});
+  return STRONGS_ES_LOADING;
+}
+// Decodificador ligero de morfología griega (estilo Robinson compacto de este módulo)
+var GK={
+  pos:{N:'sustantivo',V:'verbo',A:'adjetivo',J:'adjetivo',R:'pronombre',D:'artículo/determinante',
+       C:'conjunción',B:'adverbio',P:'preposición',T:'partícula',X:'indeclinable',I:'interjección',Q:'partícula'},
+  tense:{P:'presente',I:'imperfecto',F:'futuro',A:'aoristo',X:'perfecto',Y:'pluscuamperfecto',R:'perfecto'},
+  voice:{A:'activa',M:'media',P:'pasiva',E:'media/pasiva',D:'deponente'},
+  mood:{I:'indicativo',S:'subjuntivo',O:'optativo',M:'imperativo',N:'infinitivo',P:'participio'},
+  caseM:{N:'nominativo',G:'genitivo',D:'dativo',A:'acusativo',V:'vocativo'},
+  num:{S:'singular',P:'plural',D:'dual'},
+  gen:{M:'masculino',F:'femenino',N:'neutro',C:'común'}
+};
+function pushCNG(out,c){
+  if(c.length<3)return;
+  var g=c.slice(-1),n=c.slice(-2,-1),cs=c.slice(-3,-2);
+  if(GK.caseM[cs])out.push(GK.caseM[cs]);
+  if(GK.num[n])out.push(GK.num[n]);
+  if(GK.gen[g])out.push(GK.gen[g]);
+}
+function describeMorph(code,isGreek){
+  if(!code||!isGreek)return '';              // hebreo: se muestra el código crudo
+  var c=code.replace(/[^A-Za-z0-9]/g,''); if(!c)return '';
+  var pos=c[0], out=[], uninfl={C:1,B:1,P:1,T:1,X:1,I:1,Q:1};
+  if(GK.pos[pos])out.push(GK.pos[pos]);
+  if(pos==='V'){
+    var t=GK.tense[c[1]],v=GK.voice[c[2]],m=GK.mood[c[3]];
+    if(t)out.push(t); if(v)out.push('voz '+v); if(m)out.push(m);
+    if(c[3]==='P'){ pushCNG(out,c); }
+    else{ var rest=c.slice(4); if(/^\d/.test(rest)){out.push(rest[0]+'ª persona'); if(GK.num[rest[1]])out.push(GK.num[rest[1]]);} }
+  } else if(!uninfl[pos]){ pushCNG(out,c); }
+  return out.join(' · ');
+}
+function openStrongPopup(codesStr, morph){
+  var codes=codesStr.split(/\s+/).filter(Boolean);
+  openModal('Strong '+codes.join(', '),'<div id="lexBody"><p class="empty">Cargando léxico…</p></div>', null, function(){});
+  Promise.all([loadStrongs(), (STATE.settings.strongLang==='es'?loadStrongsEs():Promise.resolve(STRONGS_ES))]).then(function(r){
+    renderStrongPopup(codes, morph, r[0], STRONGS_ES);
+  }).catch(function(){
+    var host=$('#lexBody'); if(host)host.innerHTML='<p class="empty">No se pudo cargar el léxico (data/strongs.json).</p>';
+  });
+}
+function renderStrongPopup(codes, morph, dict, dictEs){
+  var lang=STATE.settings.strongLang==='es'?'es':'en';
+  var head='<div class="lex-langbar"><span class="lab">Idioma del léxico</span>'+
+    '<div class="seg"><button class="seg-b'+(lang==='es'?' on':'')+'" data-lang="es">Español</button>'+
+    '<button class="seg-b'+(lang==='en'?' on':'')+'" data-lang="en">Inglés</button></div></div>';
+  var html=head;
+  codes.forEach(function(code){
+    var isGreek=code[0]==='G';
+    var e=dict[code];
+    var es=(dictEs&&dictEs[code])?dictEs[code]:null;
+    var morphTxt=morph?escAttr(morph):'';
+    var morphDesc=morph?describeMorph(morph,isGreek):'';
+    if(!e){
+      html+='<div class="lex-entry"><div class="lex-top"><span class="lex-code '+(isGreek?'gr':'')+'">'+code+'</span></div>'+
+            '<div class="lex-row">Sin entrada en el léxico.</div>'+
+            (morph?('<div class="lex-row lex-morph"><span class="lab">Morfología</span><code>'+morphTxt+'</code>'+(morphDesc?(' — '+morphDesc):'')+'</div>'):'')+'</div>';
+      return;
+    }
+    // Definición y usos: español si está y el idioma es ES; si no, inglés (con nota)
+    var useEs = (lang==='es' && es && es.d);
+    var defTxt = useEs ? es.d : e.d;
+    var kjvTxt = (lang==='es' && es && es.k) ? es.k : e.k;
+    var enNote = (lang==='es' && !useEs) ? ' <span class="en-note">(inglés)</span>' : '';
+    html+='<div class="lex-entry">'+
+      '<div class="lex-top">'+
+        '<span class="lex-word'+(isGreek?'':' rtl')+'">'+escAttr(e.w||'')+'</span>'+
+        '<span class="lex-code '+(isGreek?'gr':'')+'">'+code+'</span>'+
+        (e.x?'<span class="lex-translit">'+escAttr(e.x)+'</span>':'')+
+        (e.p?'<span class="lex-pron">/'+escAttr(e.p)+'/</span>':'')+
+      '</div>'+
+      (defTxt?('<div class="lex-row"><span class="lab">'+(lang==='es'?'Definición':'Definition')+enNote+'</span>'+escAttr(defTxt)+'</div>'):'')+
+      (kjvTxt?('<div class="lex-row"><span class="lab">'+(lang==='es'?'Se traduce como':'Translated as')+'</span>'+escAttr(kjvTxt)+'</div>'):'')+
+      (e.r&&lang==='en'?('<div class="lex-row"><span class="lab">Derivation</span>'+escAttr(e.r)+'</div>'):'')+
+      (morph?('<div class="lex-row lex-morph"><span class="lab">'+(lang==='es'?'Análisis morfológico':'Morphology')+'</span><code>'+morphTxt+'</code>'+(morphDesc?(' — '+morphDesc):'')+'</div>'):'')+
+      '<div class="lex-row lex-actions"><button class="btn ghost sm" data-concord="'+escAttr(code)+'">Ver todas las apariciones</button></div>'+
+    '</div>';
+  });
+  var host=$('#lexBody'); if(!host)return; host.innerHTML=html;
+  $all('[data-concord]',host).forEach(function(b){b.onclick=function(){closeModal();concordanceStrong(b.getAttribute('data-concord'));};});
+  $all('.seg-b',host).forEach(function(b){b.onclick=function(){
+    var l=b.getAttribute('data-lang'); if(l===STATE.settings.strongLang)return;
+    STATE.settings.strongLang=l; saveState();
+    if(l==='es'){ loadStrongsEs().then(function(){renderStrongPopup(codes,morph,dict,STRONGS_ES);}); }
+    else { renderStrongPopup(codes,morph,dict,STRONGS_ES); }
+  };});
+}
+// Concordancia por número Strong: busca el código en el texto crudo de la versión activa
+function concordanceStrong(code){
+  var id=PRIMARY; if(!VER[id]||!VER[id].strong){toast('La versión activa no tiene Strong');return;}
+  switchTab('search');
+  var re=new RegExp('\\\\(?:cf11\\\\)?super[^}]*\\b'+code+'\\b');
+  var books=booksOf(id), res=[], perBook={}, total=0;
+  for(var bi=0;bi<books.length;bi++){var b=books[bi],chs=VER[id].bimap[b].ch;
+    for(var c=0;c<chs.length;c++){var vs=chs[c];
+      for(var v=0;v<vs.length;v++){var raw=vs[v]; if(!raw)continue;
+        if(raw.indexOf(code)>=0 && re.test(raw)){
+          total++; perBook[b]=(perBook[b]||0)+1;
+          if(res.length<400)res.push({b:b,c:c+1,v:v+1,snip:RTF.plain(raw).slice(0,120)});
+        }}}}
+  $('#searchMeta').innerHTML=total+' apariciones de Strong '+code+' en '+Object.keys(perBook).length+' libros';
+  var wrap=$('#searchResults'); wrap.innerHTML='';
+  res.forEach(function(r){var d=document.createElement('div');d.className='result';
+    d.innerHTML='<div class="ref">'+bookAbbr(r.b)+' '+r.c+':'+r.v+'</div><div class="snip">'+escAttr(r.snip)+'…</div>';
+    d.onclick=function(){goTo(r.b,r.c,r.v);};wrap.appendChild(d);});
+}
+
+
+function renderApartados(){
+  var wrap=$('#apList'); wrap.innerHTML='';
+  if(!STATE.apartados.length){wrap.innerHTML='<p class="empty">Aún no hay apartados.<br>Crea uno para agrupar versículos por tema, misterio o estudio.</p>';return;}
+  STATE.apartados.forEach(function(ap){
+    var d=document.createElement('div'); d.className='apartado';
+    var head=document.createElement('div'); head.className='ap-head';
+    head.innerHTML='<span class="ap-swatch" style="background:'+(HLHEX[ap.color]||'#B5893C')+'"></span>'+
+      '<span class="ap-name">'+escAttr(ap.name)+'</span><span class="ap-count">'+ap.items.length+'</span>';
+    var tools=document.createElement('div'); tools.style.marginLeft='6px';
+    tools.innerHTML='<button class="btn ghost sm" data-edit>✎</button> <button class="btn ghost sm" data-del>🗑</button>';
+    tools.querySelector('[data-edit]').onclick=function(){editApartado(ap.id);};
+    tools.querySelector('[data-del]').onclick=function(){if(confirm('¿Eliminar el apartado «'+ap.name+'»?')){STATE.apartados=STATE.apartados.filter(function(x){return x.id!==ap.id;});saveState();renderApartados();renderReader();}};
+    head.appendChild(tools); d.appendChild(head);
+    if(ap.note){var nn=document.createElement('div');nn.className='mini';nn.style.margin='6px 0';nn.textContent=ap.note;d.appendChild(nn);}
+    ap.items.forEach(function(it){
+      var raw=PRIMARY?getVerseRaw(PRIMARY,it.b,it.c,it.v):null;
+      var txt=raw?RTF.plain(raw):''; if(txt.length>90)txt=txt.slice(0,90)+'…';
+      var row=document.createElement('div'); row.className='ap-verse';
+      row.innerHTML='<button class="apv-x" title="Quitar">×</button><span class="apv-ref">'+bookAbbr(it.b)+' '+it.c+':'+it.v+'</span> '+escAttr(txt);
+      row.querySelector('.apv-ref').onclick=function(){goTo(it.b,it.c,it.v);};
+      row.querySelector('.apv-x').onclick=function(){ap.items=ap.items.filter(function(x){return !(x.b===it.b&&x.c===it.c&&x.v===it.v);});saveState();renderApartados();renderReader();};
+      d.appendChild(row);
+    });
+    wrap.appendChild(d);
+  });
+}
+function editApartado(id){
+  var ap=STATE.apartados.filter(function(x){return x.id===id;})[0]; if(!ap)return;
+  openModal('Editar apartado',
+    '<label>Nombre</label><input type="text" id="mApName" value="'+escAttr(ap.name)+'">'+
+    '<label>Color</label><div class="color-choice" id="mApColors"></div>'+
+    '<label>Nota / descripción del estudio</label><textarea id="mApNote">'+escAttr(ap.note||'')+'</textarea>',
+    function(){ap.name=$('#mApName').value.trim()||ap.name;ap.note=$('#mApNote').value;saveState();renderApartados();renderReader();closeModal();},
+    function(){fillColorChoice('mApColors',ap.color,function(c){ap.color=c;});});
+}
+function fillColorChoice(hostId,current,onpick){
+  var host=$('#'+hostId); if(!host)return; host.innerHTML='';
+  HLCOLORS.forEach(function(col){var c=document.createElement('div');c.className='cc'+(col===current?' on':'');c.style.background=HLHEX[col];
+    c.onclick=function(){$all('.cc',host).forEach(function(x){x.classList.remove('on');});c.classList.add('on');onpick(col);};host.appendChild(c);});
+}
+function newApartadoDialog(preselectVerse){
+  var chosen={color:'amber'};
+  openModal('Nuevo apartado',
+    '<label>Nombre</label><input type="text" id="mApName" placeholder="p. ej. La fe de Abraham">'+
+    '<label>Color</label><div class="color-choice" id="mApColors"></div>'+
+    '<label>Nota (opcional)</label><textarea id="mApNote" placeholder="Idea, misterio o tema a escudriñar…"></textarea>',
+    function(){
+      var name=$('#mApName').value.trim(); if(!name){toast('Ponle un nombre');return;}
+      var ap={id:'ap'+Date.now(),name:name,color:chosen.color,note:$('#mApNote').value,items:[]};
+      if(preselectVerse)ap.items.push(preselectVerse);
+      STATE.apartados.push(ap); saveState(); renderApartados(); renderReader(); closeModal();
+      toast('Apartado creado');
+    },
+    function(){fillColorChoice('mApColors','amber',function(c){chosen.color=c;});});
+}
+function addToApartadoDialog(b,c,v){
+  if(!STATE.apartados.length){newApartadoDialog({b:b,c:c,v:v});return;}
+  var opts=STATE.apartados.map(function(ap){return '<option value="'+ap.id+'">'+escAttr(ap.name)+'</option>';}).join('');
+  openModal('Añadir '+bookAbbr(b)+' '+c+':'+v+' a…',
+    '<label>Apartado</label><select id="mApSel">'+opts+'</select>'+
+    '<div style="margin-top:10px"><button class="btn ghost sm" id="mApNew">+ Crear nuevo apartado</button></div>',
+    function(){
+      var ap=STATE.apartados.filter(function(x){return x.id===$('#mApSel').value;})[0];
+      if(ap){ if(!ap.items.some(function(it){return it.b===b&&it.c===c&&it.v===v;})){ap.items.push({b:b,c:c,v:v});}
+        saveState(); renderApartados(); renderReader(); closeModal(); toast('Añadido a «'+ap.name+'»'); }
+    },
+    function(){ $('#mApNew').onclick=function(){closeModal();newApartadoDialog({b:b,c:c,v:v});}; });
+}
+function noteDialog(b,c,v){
+  var key=vk(b,c,v); var cur=STATE.notes[key]||'';
+  openModal('Nota · '+bookAbbr(b)+' '+c+':'+v,
+    '<label>Tu nota</label><textarea id="mNote" placeholder="Observaciones, referencias cruzadas, preguntas…">'+escAttr(cur)+'</textarea>',
+    function(){var val=$('#mNote').value.trim(); if(val)STATE.notes[key]=val; else delete STATE.notes[key]; saveState(); renderReader(); closeModal();});
+}
+
+/* ======================= Exportar / importar estudio ======================= */
+function exportStudy(){
+  var payload={app:'Escudriñad',ver:1,exported:new Date().toISOString(),
+    highlights:STATE.highlights,notes:STATE.notes,apartados:STATE.apartados};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='estudio_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  toast('Estudio exportado');
+}
+function importStudy(file){
+  var fr=new FileReader();
+  fr.onload=function(){try{var d=JSON.parse(fr.result);
+    if(d.highlights)Object.assign(STATE.highlights,d.highlights);
+    if(d.notes)Object.assign(STATE.notes,d.notes);
+    if(Array.isArray(d.apartados)){var ids={};STATE.apartados.forEach(function(a){ids[a.id]=1;});
+      d.apartados.forEach(function(a){if(!ids[a.id])STATE.apartados.push(a);});}
+    saveState(); renderApartados(); renderReader(); toast('Estudio importado');
+  }catch(e){toast('Archivo no válido');}};
+  fr.readAsText(file);
+}
+
+/* ======================= Importar .bblx ======================= */
+var SQL=null, SQLBASE='';
+function loadScriptWithFallback(paths){
+  return new Promise(function(res,rej){
+    var i=0;
+    (function next(){
+      if(i>=paths.length){rej(new Error('sql-wasm.js no se encontró (ni en libs/ ni en la raíz)'));return;}
+      var p=paths[i++];
+      var s=document.createElement('script'); s.src=p;
+      s.onload=function(){ SQLBASE=(p.indexOf('libs/')===0)?'libs/':''; res(); };
+      s.onerror=function(){ next(); };
+      document.head.appendChild(s);
+    })();
+  });
+}
+function ensureSQL(){
+  if(SQL)return Promise.resolve(SQL);
+  var pre=(typeof initSqlJs!=='undefined')?Promise.resolve():loadScriptWithFallback(['libs/sql-wasm.js','sql-wasm.js']);
+  return pre.then(function(){
+    if(typeof initSqlJs==='undefined')throw new Error('initSqlJs no disponible');
+    return initSqlJs({locateFile:function(f){return SQLBASE+f;}}).then(function(s){SQL=s;return s;});
+  });
+}
+function importBblx(file){
+  var msg=$('#verMsg'); msg.textContent='Leyendo '+file.name+'…';
+  ensureSQL().then(function(){
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var db=new SQL.Database(new Uint8Array(fr.result));
+        // metadatos
+        var name=file.name.replace(/\.[^.]+$/,''), abbr=name.slice(0,10), strong=false;
+        try{var dr=db.exec("SELECT Description,Abbreviation,Strong FROM Details");
+          if(dr.length&&dr[0].values.length){var row=dr[0].values[0];
+            name=(row[0]||name).trim(); abbr=(row[1]||abbr).trim(); strong=!!row[2];}}catch(e){}
+        var id=(abbr||name).replace(/[^A-Za-z0-9]+/g,'')||('BIB'+Date.now());
+        if(VER[id])id=id+Date.now().toString().slice(-4);
+        // versículos
+        var res=db.exec("SELECT Book,Chapter,Verse,Scripture FROM Bible ORDER BY Book,Chapter,Verse");
+        if(!res.length)throw new Error('Sin tabla Bible');
+        var rows=res[0].values;
+        var byBook={};
+        for(var i=0;i<rows.length;i++){var b=rows[i][0],c=rows[i][1],v=rows[i][2],s=rows[i][3]||'';
+          (byBook[b]=byBook[b]||{});(byBook[b][c]=byBook[b][c]||{})[v]=s;}
+        var books=[];
+        Object.keys(byBook).map(Number).sort(function(a,b){return a-b;}).forEach(function(b){
+          var chs=[]; Object.keys(byBook[b]).map(Number).sort(function(a,b){return a-b;}).forEach(function(c){
+            var vs=byBook[b][c]; var mx=Math.max.apply(null,Object.keys(vs).map(Number));
+            var arr=[]; for(var k=1;k<=mx;k++)arr.push(vs[k]!==undefined?vs[k]:''); chs.push(arr);});
+          books.push({n:b,ch:chs});
+        });
+        db.close();
+        var data={id:id,name:name,abbr:abbr,lang:'es',strong:strong,books:books};
+        registerVersion(data);
+        idbPut({id:id,data:data,imported:Date.now()});
+        msg.innerHTML='<span style="color:var(--brass)">✓ '+escAttr(name)+'</span> añadida.';
+        refreshVersionUI();
+        toast('Versión «'+abbr+'» cargada');
+      }catch(err){
+        msg.innerHTML='<span style="color:var(--rubric)">No se pudo leer: '+escAttr(err.message)+'</span>';
+      }
+    };
+    fr.readAsArrayBuffer(file);
+  }).catch(function(err){
+    var b=location.href.replace(/[^/]*$/,'');
+    $('#verMsg').innerHTML='<span style="color:var(--rubric)">Motor SQLite no disponible ('+escAttr(err.message)+').<br>Busqué <b>sql-wasm.js</b> en <code style="word-break:break-all">'+b+'libs/</code> y en <code style="word-break:break-all">'+b+'</code>. Súbelo (y <b>sql-wasm.wasm</b>) junto a index.html.</span>';
+  });
+}
+
+/* ======================= UI de versiones ======================= */
+function renderVersionList(){
+  var wrap=$('#verList'); wrap.innerHTML='';
+  var ids=Object.keys(VER);
+  if(!ids.length){wrap.innerHTML='<p class="empty">No hay versiones.</p>';return;}
+  ids.forEach(function(id){
+    var V=VER[id]; var isPrim=id===PRIMARY; var isCmp=COMPARE.indexOf(id)>=0;
+    var d=document.createElement('div'); d.className='ver-item';
+    var pill=isPrim?'<span class="pill prim">Principal</span>':(isCmp?'<span class="pill">Comparando</span>':'');
+    var badges=(V.strong?'<span class="pill strong-pill">Strong</span>':'');
+    var sub=V.bimap?(escAttr(V.abbr)+' · '+booksOf(id).length+' libros'):(escAttr(V.abbr)+' · <span style="color:var(--sand)">se carga al abrir</span>');
+    d.innerHTML='<div class="vi-main"><div class="vi-name">'+escAttr(V.name)+' '+badges+'</div><div class="vi-sub">'+sub+'</div></div>'+pill;
+    var tools=document.createElement('div'); tools.style.display='flex'; tools.style.gap='4px'; tools.style.flexDirection='column';
+    var bPrim=document.createElement('button'); bPrim.className='btn ghost sm'; bPrim.textContent='Principal';
+    bPrim.onclick=function(){setPrimary(id);};
+    var bCmp=document.createElement('button'); bCmp.className='btn ghost sm'; bCmp.textContent=isCmp?'Quitar':'Comparar';
+    bCmp.onclick=function(){toggleCompare(id);};
+    tools.appendChild(bPrim); tools.appendChild(bCmp);
+    if(id!=='RV1960' && !BUNDLED[id]){var bDel=document.createElement('button'); bDel.className='btn danger sm'; bDel.textContent='Eliminar';
+      bDel.onclick=function(){if(confirm('¿Eliminar '+V.name+'?')){delete VER[id];idbDel(id);COMPARE=COMPARE.filter(function(x){return x!==id;});if(PRIMARY===id)PRIMARY=Object.keys(VER)[0];refreshVersionUI();renderReader();}};
+      tools.appendChild(bDel);}
+    d.appendChild(tools); wrap.appendChild(d);
+  });
+}
+function fillVersionSelectors(){
+  var sel=$('#primarySel'); sel.innerHTML='';
+  Object.keys(VER).forEach(function(id){var o=document.createElement('option');o.value=id;o.textContent=VER[id].abbr+' — '+VER[id].name;if(id===PRIMARY)o.selected=true;sel.appendChild(o);});
+}
+function setPrimary(id){
+  var V=VER[id]; if(!V)return;
+  if(!V.bimap){ toast('Cargando '+(V.abbr||id)+'…'); $('#primarySel').value=PRIMARY||id;
+    ensureVersionLoaded(id).then(function(){_applyPrimary(id);}).catch(function(){toast('No se pudo cargar '+(V.abbr||id));fillVersionSelectors();});
+    return; }
+  _applyPrimary(id);
+}
+function _applyPrimary(id){ PRIMARY=id; COMPARE=COMPARE.filter(function(x){return x!==id;});
+  refreshVersionUI(); renderBookList(); renderChapters(); renderReader(); saveState(); }
+function toggleCompare(id){
+  if(id===PRIMARY){toast('Ya es la versión principal');return;}
+  var i=COMPARE.indexOf(id);
+  if(i>=0){COMPARE.splice(i,1); refreshVersionUI(); renderReader(); saveState(); return;}
+  if(COMPARE.length>=2){toast('Máximo 2 versiones para comparar');return;}
+  var V=VER[id];
+  if(V&&!V.bimap){ toast('Cargando '+(V.abbr||id)+'…');
+    ensureVersionLoaded(id).then(function(){COMPARE.push(id);refreshVersionUI();renderReader();saveState();}).catch(function(){toast('No se pudo cargar '+(V.abbr||id));});
+    return; }
+  COMPARE.push(id); refreshVersionUI(); renderReader(); saveState();
+}
+function refreshVersionUI(){ fillVersionSelectors(); renderVersionList(); renderBookList(); renderChapters();
+  $('#cmpBtn').classList.toggle('on',COMPARE.length>0);
+  updateStrongButton(); }
+function updateStrongButton(){
+  var has=PRIMARY&&VER[PRIMARY]&&VER[PRIMARY].strong;
+  var btn=$('#strongBtn'); if(!btn)return;
+  btn.style.display=has?'inline-flex':'none';
+  if(!has&&STATE.settings.showStrong){STATE.settings.showStrong=false;applyBodyClasses();}
+  btn.classList.toggle('on',!!STATE.settings.showStrong);
+}
+
+/* ======================= Modales ======================= */
+function openModal(title,bodyHtml,onSave,afterRender){
+  var m=$('#modal');
+  m.innerHTML='<div class="m-head">'+escAttr(title)+'<div class="spacer"></div><button class="xbtn" id="mClose">×</button></div>'+
+    '<div class="m-body">'+bodyHtml+'</div>'+
+    '<div class="m-foot"><button class="btn ghost" id="mCancel">Cancelar</button>'+(onSave?'<button class="btn" id="mSave">Guardar</button>':'')+'</div>';
+  $('#modalBg').classList.add('on');
+  $('#mClose').onclick=closeModal; $('#mCancel').onclick=closeModal;
+  if(onSave)$('#mSave').onclick=onSave;
+  if(afterRender)afterRender();
+}
+function closeModal(){$('#modalBg').classList.remove('on');$('#modal').innerHTML='';}
+
+/* ======================= Tabs ======================= */
+function switchTab(name){
+  $all('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.tab===name);});
+  $all('.panel').forEach(function(p){p.classList.toggle('on',p.id==='panel-'+name);});
+  if(window.innerWidth<=860)document.body.classList.remove('nav-closed');
+  if(name==='ley' && !LEY) openLey();
+}
+
+/* ======================= Eventos globales ======================= */
+function wireEvents(){
+  $all('.tab').forEach(function(t){t.onclick=function(){switchTab(t.dataset.tab);};});
+  $all('.testament-row button').forEach(function(b){b.onclick=function(){navTest=b.dataset.t;renderBookList();};});
+  $('#hamb').onclick=function(){document.body.classList.toggle('nav-closed');};
+  $('#navScrim').onclick=function(){document.body.classList.add('nav-closed');};
+
+  // Toggles superiores
+  $('#redBtn').onclick=function(){STATE.settings.redLetter=!STATE.settings.redLetter;this.classList.toggle('on',STATE.settings.redLetter);applyBodyClasses();saveState();};
+  $('#xrefBtn').onclick=function(){STATE.settings.showXref=!STATE.settings.showXref;this.classList.toggle('on',STATE.settings.showXref);applyBodyClasses();saveState();};
+  $('#strongBtn').onclick=function(){STATE.settings.showStrong=!STATE.settings.showStrong;this.classList.toggle('on',STATE.settings.showStrong);applyBodyClasses();saveState();if(STATE.settings.showStrong)loadStrongs();};
+  $('#chPrev').onclick=function(){changeChapter(-1);};
+  $('#chNext').onclick=function(){changeChapter(1);};
+  $('#sbToggle').onclick=function(){STATE.settings.sbCollapsed=!STATE.settings.sbCollapsed;applyBodyClasses();saveState();};
+  document.addEventListener('keydown',function(e){
+    if(e.altKey||e.ctrlKey||e.metaKey)return;
+    var t=e.target, tag=t&&t.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'||(t&&t.isContentEditable))return;
+    if($('#modalBg') && $('#modalBg').classList.contains('on'))return;
+    if(e.key==='ArrowLeft'){changeChapter(-1);}
+    else if(e.key==='ArrowRight'){changeChapter(1);}
+  });
+  $('#themeBtn').onclick=function(){var order=['papel','sepia','noche'];var i=order.indexOf(STATE.settings.theme);STATE.settings.theme=order[(i+1)%3];applyBodyClasses();saveState();toast('Tema: '+STATE.settings.theme);};
+  $('#fontBtn').onclick=function(){STATE.settings.fontStep=(STATE.settings.fontStep+1)%5;applyBodyClasses();saveState();};
+  $('#cmpBtn').onclick=function(){switchTab('ver');toast('Elige versiones con “Comparar” en la lista');};
+  $('#primarySel').onchange=function(){setPrimary(this.value);};
+
+  // Búsqueda
+  $('#doSearch').onclick=function(){runSearch({main:$('#qMain').value,excl:$('#qExcl').value,mode:$('#qMode').value,scope:$('#qScope').value,wholeWord:$('#qWord').checked,matchCase:$('#qCase').checked});};
+  $('#qMain').addEventListener('keydown',function(e){if(e.key==='Enter')$('#doSearch').click();});
+  $('#clrSearch').onclick=function(){$('#qMain').value='';$('#qExcl').value='';$('#searchResults').innerHTML='';$('#searchMeta').textContent='';};
+  $('#quickSearch').addEventListener('keydown',function(e){if(e.key==='Enter'){switchTab('search');$('#qMain').value=this.value;$('#doSearch').click();}});
+
+  // Análisis
+  $('#doAna').onclick=function(){runAnalysis($('#anaTerm').value,$('#anaWord').checked);};
+  $('#leyFilter').addEventListener('input',function(){ if(LEY)renderLey(LEY,this.value.trim()); });
+  $('#anaTerm').addEventListener('keydown',function(e){if(e.key==='Enter')$('#doAna').click();});
+
+  // Apartados
+  $('#newApartado').onclick=function(){newApartadoDialog(null);};
+  $('#exportStudy').onclick=exportStudy;
+  $('#importStudyBtn').onclick=function(){$('#importStudyFile').click();};
+  $('#importStudyFile').onchange=function(){if(this.files[0])importStudy(this.files[0]);this.value='';};
+
+  // Versiones
+  $('#pickFile').onclick=function(){$('#verFile').click();};
+  $('#verFile').onchange=function(){if(this.files[0])importBblx(this.files[0]);this.value='';};
+  var dz=$('#dropzone');
+  ['dragenter','dragover'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag');});});
+  ['dragleave','drop'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove('drag');});});
+  dz.addEventListener('drop',function(e){var f=e.dataTransfer.files[0];if(f)importBblx(f);});
+
+  // Barra de versículo
+  buildSwatches();
+  $('#vbAp').onclick=function(){if(SELECTED)addToApartadoDialog(SELECTED.b,SELECTED.c,SELECTED.v);};
+  $('#vbNote').onclick=function(){if(SELECTED)noteDialog(SELECTED.b,SELECTED.c,SELECTED.v);};
+  $('#vbCopy').onclick=function(){if(!SELECTED)return;var raw=getVerseRaw(PRIMARY,SELECTED.b,SELECTED.c,SELECTED.v);var txt=raw?RTF.plain(raw):'';
+    var ref=bookName(SELECTED.b)+' '+SELECTED.c+':'+SELECTED.v+' ('+VER[PRIMARY].abbr+')';
+    navigator.clipboard&&navigator.clipboard.writeText('«'+txt+'» — '+ref);toast('Versículo copiado');};
+
+  // Click en el lector (delegación)
+  $('#reader').addEventListener('click',function(e){
+    var st=e.target.closest('.strong'); if(st){e.stopPropagation();openStrongPopup(st.getAttribute('data-s')||'',st.getAttribute('data-m')||'');return;}
+    var nn=e.target.closest('.noteflag'); if(nn){var k=nn.dataset.note.split('.');noteDialog(+k[0],+k[1],+k[2]);return;}
+    var vn=e.target.closest('.vn,.cmp-vn'); 
+    var row=e.target.closest('.v,.cmp-row');
+    if(row&&row.dataset.v){ selectVerse(+row.dataset.b,+row.dataset.c,+row.dataset.v,row); }
+    else { closeVbar(); }
+  });
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#vbar')||e.target.closest('#reader')||e.target.closest('.modal'))return;
+    if($('#vbar').classList.contains('on'))closeVbar();
+  });
+  window.addEventListener('resize',function(){if(window.innerWidth>860)document.body.classList.remove('nav-closed');});
+  $('#modalBg').addEventListener('click',function(e){if(e.target===this)closeModal();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeVbar();}});
+}
+
+/* ======================= Arranque ======================= */
+function fetchFirstJson(paths){
+  return new Promise(function(res,rej){
+    var i=0, lastErr=null;
+    (function next(){
+      if(i>=paths.length){rej(lastErr||new Error('no encontrado'));return;}
+      var p=paths[i++];
+      fetch(p).then(function(r){
+        if(r.ok){r.json().then(function(d){res(d);}).catch(function(e){lastErr=e;next();});}
+        else{lastErr=new Error('HTTP '+r.status+' en '+p);next();}
+      }).catch(function(e){lastErr=e;next();});
+    })();
+  });
+}
+function loadPrimaryJson(){
+  return fetchFirstJson(['data/RV1960.json','RV1960.json']).then(function(data){registerVersion(data);});
+}
+function boot(){
+  loadState();
+  wireEvents();
+  applyBodyClasses();
+  if(window.innerWidth<=860)document.body.classList.add('nav-closed');
+  $('#redBtn').classList.toggle('on',!!STATE.settings.redLetter);
+  $('#xrefBtn').classList.toggle('on',!!STATE.settings.showXref);
+
+  idbOpen().then(idbAll).then(function(list){
+    (list||[]).forEach(function(rec){ if(rec&&rec.data)registerVersion(rec.data); });
+    return loadManifest();
+  }).then(function(m){
+    // ¿qué versión será la principal?
+    var savedPrim=null, savedCmp=[];
+    try{var vv=JSON.parse(localStorage.getItem(LS+'view')||'null');
+      if(vv){savedPrim=vv.primary||null; savedCmp=vv.compare||[];}}catch(e){}
+    var wantPrim = (savedPrim&&VER[savedPrim]) ? savedPrim
+                 : (m&&m.primary&&VER[m.primary]) ? m.primary
+                 : (VER['RV1960']?'RV1960':Object.keys(VER)[0]);
+    if(!wantPrim){
+      // sin manifiesto ni IDB: intenta la RV1960 suelta como antes
+      return loadPrimaryJson().then(function(){PRIMARY='RV1960'; return finishBoot(savedCmp);})
+        .catch(function(err){
+          var b=location.href.replace(/[^/]*$/,'');
+          $('#loaderText').innerHTML='No se pudo cargar la Biblia.<br>Busqué <code style="color:var(--brass);word-break:break-all">'+b+'data/versions.json</code> y <code style="color:var(--brass);word-break:break-all">'+b+'data/RV1960.json</code>.<br>Sube al menos <b>RV1960.json</b> junto a index.html. ('+escAttr(err.message)+')';
+          throw err;
+        });
+    }
+    PRIMARY=wantPrim;
+    return ensureVersionLoaded(PRIMARY).then(function(){ return finishBoot(savedCmp); });
+  }).then(function(){
+    $('#loader').style.display='none';
+  }).catch(function(){
+    if(!PRIMARY)PRIMARY=Object.keys(VER).find(function(id){return VER[id].bimap;})||Object.keys(VER)[0]||null;
+    refreshVersionUI(); renderBookList(); renderChapters(); renderApartados(); renderReader();
+    setTimeout(function(){$('#loader').style.display='none';},400);
+  });
+}
+function finishBoot(savedCmp){
+  // carga (perezosa) las versiones de comparación guardadas, si existen
+  var toLoad=(savedCmp||[]).filter(function(id){return VER[id];});
+  return Promise.all(toLoad.map(function(id){return ensureVersionLoaded(id).then(function(){return id;}).catch(function(){return null;});}))
+    .then(function(ok){
+      COMPARE=ok.filter(Boolean).filter(function(id){return id!==PRIMARY;}).slice(0,2);
+      if(!VER[CUR.book])CUR={book:1,chapter:1};
+      refreshVersionUI(); renderBookList(); renderChapters(); renderApartados(); renderReader();
+    });
+}
+window.addEventListener('DOMContentLoaded',boot);
+
+/* PWA: registrar service worker para uso sin conexión */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){/* sin conexión / entorno sin SW: ignora */});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+# Escudriñad — App de estudio bíblico offline
+
+Aplicación web de una sola página para **leer, buscar y escudriñar las Escrituras**,
+que lee directamente el formato de módulos **e-Sword `.bblx`** (SQLite). Pensada para
+funcionar sin conexión y desplegarse en **GitHub Pages**.
+
+Incluye ya cargada la **Reina-Valera 1960** convertida desde tu módulo.
+
+## Estructura de archivos
+
+```
+escudrinad/
+├── index.html              ← la aplicación (HTML + CSS + JS, autocontenida)
+├── data/
+│   └── RV1960.json         ← Biblia RV1960 convertida (4.2 MB)
+├── libs/
+│   ├── sql-wasm.js         ← motor SQLite (para leer .bblx en el navegador)
+│   └── sql-wasm.wasm
+├── convertir_bblx.py       ← convertidor por lote (.bblx → JSON)
+├── parser.js               ← parser del marcado RTF (referencia; ya va embebido en index.html)
+└── README.md
+```
+
+## Cómo ejecutarla
+
+**En local** (por seguridad del navegador, `fetch` no lee archivos con `file://`):
+
+```bash
+cd escudrinad
+python3 -m http.server 8000
+# abre http://localhost:8000
+```
+
+**En GitHub Pages**: sube toda la carpeta al repositorio y activa Pages sobre la rama.
+Funciona tal cual, incluida la lectura de `.bblx` arrastrados.
+
+## Funciones
+
+- **Lectura** como edición crítica: títulos de perícopa, **palabras de Cristo en rojo**
+  (conmutable), marcadores de referencia cruzada (conmutable), cursivas del traductor.
+- **Varias versiones**: arrastra un `.bblx`/`.bbl` a la pestaña *Biblias* y se convierte
+  en el navegador; queda guardado (IndexedDB) para próximas sesiones.
+- **Comparar** hasta 3 versiones en paralelo, alineadas por versículo.
+- **Buscar** por palabras (Y / O / frase exacta), con *excluir*, palabra completa,
+  distinguir mayúsculas y ámbito (toda la Biblia / AT / NT / libro actual). Resultados con
+  conteo total y desglose por libro.
+- **Subrayar** versículos en 5 colores.
+- **Apartados**: agrupa versículos por tema, misterio o estudio, con nota por apartado y
+  **notas por versículo**.
+- **Análisis** de un término: total de apariciones, AT vs NT y distribución por libro.
+- **Números de Strong**: al cargar una versión con Strong (p. ej. «RV1960 con números Strong»),
+  aparece el botón **Strong** en la barra. Al activarlo se muestran los números junto a cada palabra;
+  al hacer clic se abre un cuadro con la **palabra hebrea/griega**, transliteración, pronunciación,
+  definición de Strong, uso y **análisis morfológico**, con enlace a todas sus apariciones.
+- **Temas de lectura** (papel / sepia / noche) y tamaño de letra.
+- **Exportar / importar** tu estudio completo (subrayados, notas y apartados) a un `.json`.
+
+Todo el estudio se guarda en este navegador. Usa *Exportar* para trasladarlo.
+
+## Añadir más versiones por lote
+
+```bash
+python3 convertir_bblx.py "MiBiblia.bblx" data/NVI.json NVI
+```
+
+Luego, para que se cargue automáticamente al iniciar, añade su nombre de archivo a la lista
+de versiones precargadas en `index.html` (función `loadPrimaryJson` / arranque). O simplemente
+arrástrala desde la pestaña *Biblias*.
+
+## Sobre el formato `.bblx`
+
+Es una base **SQLite** con dos tablas:
+
+- `Bible(Book INT, Chapter INT, Verse INT, Scripture TEXT)`
+- `Details(Description, Abbreviation, Comments, Version, Font, RightToLeft, OT, NT, Apocrypha, Strong)`
+
+El texto de `Scripture` usa un marcado **RTF-lite**:
+
+| Marca | Significado |
+|---|---|
+| `\par` | salto de párrafo |
+| `{\qc \b Título\par}` | título de perícopa (encabezado) |
+| `{\cf6 …}` | palabras de Cristo (rojo rúbrica) |
+| `{\super\cf6 (A)}` | marcador de referencia cruzada (volado) |
+| `\i … \i0` | cursiva (palabras añadidas por el traductor) |
+
+`parser.js` traduce ese marcado a HTML seguro separando los títulos del cuerpo del versículo.
+
+## Léxico de Strong
+
+El archivo `data/strongs.json` contiene el léxico hebreo y griego de Strong (14,197 entradas)
+que alimenta el cuadro emergente. Se carga **solo cuando se necesita** (al activar Strong o abrir
+una palabra), no en el arranque.
+
+Fuente: *Strong's Hebrew & Greek Dictionaries*, edición de **OpenScriptures**, licencia
+**CC-BY-SA**. Si publicas el sitio, conserva esta atribución.
+
+Nota: los módulos `.bblx` solo guardan los **números** de Strong y la morfología; la palabra
+original y su definición provienen de este léxico. La versión «RV1960 con números Strong» es
+grande (~15 MB en JSON), por eso conviene **cargarla arrastrando el `.bblx`** en la pestaña
+*Biblias* (se guarda en el navegador) en lugar de subirla al repositorio.
+
+## Varias versiones dentro de la app
+
+La app carga las versiones que estén listadas en **`data/versions.json`** (el «manifiesto»):
+
+```json
+{
+  "primary": "RV1960",
+  "versions": [
+    { "id": "RV1960",  "name": "Reina-Valera 1960",                   "abbr": "RV 1960", "file": "data/RV1960.json",  "strong": false },
+    { "id": "RV1960S", "name": "Reina-Valera 1960 con números Strong", "abbr": "RV1960+", "file": "data/RV1960S.json", "strong": true }
+  ]
+}
+```
+
+- `primary` es la versión que se abre al inicio.
+- Solo la principal se descarga al arrancar; **las demás se cargan cuando las abres**
+  (al ponerlas como *Principal* o *Comparar*), para no descargar todo de golpe.
+
+### Añadir una versión nueva
+1. Convierte su módulo: `python3 convertir_bblx.py MiBiblia.bblx data/MiBiblia.json`
+   (detecta solo si trae Strong). El script imprime una **línea lista para pegar**.
+2. Copia `data/MiBiblia.json` al repositorio y pega esa línea dentro de `"versions"`.
+3. Sube ambos cambios a GitHub. Listo.
+
+> **Nota sobre la versión con Strong incluida:** el módulo original de Strong no traía las
+> palabras de Cristo en rojo y tenía algunas palabras dañadas (p. ej. «Isr¿l» por «Israel»).
+> El archivo `data/RV1960S.json` que se incluye ya fue **corregido**: se le transfirió el rojo
+> desde la RV1960 base (alineando el texto) y se repararon esas palabras. Si regeneras ese JSON
+> desde el `.bblx`, vuelve a pasar `node merge_red.js` para reaplicar ambas cosas.
+
+> **Tamaño:** una versión **con Strong** pesa ~15 MB en JSON (~3 MB al servirse comprimida).
+> GitHub lo admite sin problema, pero no listes muchas Strong como principales a la vez.
+
+> **Derechos de autor:** si tu repositorio es **público**, recuerda que traducciones como
+> NVI, LBLA, NTV o DHH tienen copyright. Para publicar abiertamente conviene usar versiones
+> libres o de dominio público (p. ej. Reina-Valera 1909, RV Gómez). La RV1960 es © Sociedades
+> Bíblicas Unidas.
+
+## Léxico de Strong
+## Instalar como aplicación (PWA)
+
+La app se puede instalar en el teléfono y abrir **a pantalla completa**, sin la barra
+del navegador, gracias a `manifest.webmanifest`, las etiquetas del `<head>` y el service
+worker `sw.js` (que además permite **usarla sin conexión** tras la primera visita).
+
+Archivos que deben estar junto a `index.html` en el repositorio:
+`manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`,
+`apple-touch-icon.png`, `favicon-32.png`.
+
+**Android (Chrome):** menú ⋮ → «Instalar aplicación» / «Agregar a pantalla principal».
+**iPhone (Safari):** botón Compartir → «Agregar a inicio». *(En iPhone debe hacerse desde
+Safari; Chrome en iOS no crea la PWA.)*
+
+Si ya habías agregado un acceso directo antes de estos cambios, **bórralo y vuelve a
+agregarlo** para que tome la configuración de pantalla completa y el ícono nuevo.
+
+Los íconos se generan con `make_icon.py` (requiere Pillow); ejecútalo si quieres
+regenerarlos o cambiar el diseño.
