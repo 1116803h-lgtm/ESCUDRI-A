@@ -101,7 +101,8 @@ select.tb-sel{
 #topSearch input::placeholder{color:var(--board-soft)}
 
 /* ---- Sidebar: pestañas ---- */
-.tabs{display:flex; gap:2px; padding:8px 8px 0; background:var(--board)}
+.tabs{display:flex; flex-wrap:wrap; gap:2px; padding:8px 8px 0; background:var(--board)}
+.tab{flex:1 1 auto; min-width:68px}
 .tab{
   flex:1; text-align:center; padding:8px 4px; font-size:11.5px; letter-spacing:.4px; text-transform:uppercase;
   border:0; background:transparent; color:var(--board-soft); border-bottom:2px solid transparent;
@@ -319,6 +320,28 @@ body:not(.showstrong) .strong{display:none}
 .ley-badge{font-size:9px; background:rgba(229,163,160,.2); color:#e2a3a0; border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
 .ley-dbadge{font-size:9px; background:rgba(255,255,255,.08); color:var(--board-soft); border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
 #leyFilter{width:100%}
+/* ===== Doctrinas ===== */
+#docFilter{width:100%}
+.doc-sec{border:1px solid rgba(255,255,255,.08); border-radius:9px; margin-bottom:7px; overflow:hidden; background:rgba(255,255,255,.02)}
+.doc-sec-h{display:flex; align-items:center; gap:8px; padding:10px; cursor:pointer; user-select:none}
+.doc-sec-h:hover{background:rgba(255,255,255,.04)}
+.doc-sec-h .cx{font-family:var(--mono); font-size:11px; color:var(--brass); min-width:20px}
+.doc-sec-h .tt{flex:1; font-size:12.5px; font-weight:700; color:var(--board-ink); letter-spacing:.3px; text-transform:uppercase; line-height:1.3}
+.doc-sec-h .ar{color:var(--board-soft); transition:transform .18s; font-size:12px}
+.doc-sec.open .doc-sec-h .ar{transform:rotate(90deg)}
+.doc-body{display:none; padding:4px 11px 10px}
+.doc-sec.open .doc-body{display:block}
+.doc-h2{font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--brass); margin:12px 0 5px; border-bottom:1px solid rgba(181,137,60,.3); padding-bottom:3px}
+.doc-h3{font-size:12px; font-weight:700; color:var(--board-ink); margin:9px 0 3px}
+.doc-p{font-size:12.5px; line-height:1.55; color:var(--board-soft); margin:6px 0}
+.doc-quote{font-size:12.5px; line-height:1.55; color:var(--board-ink); font-style:italic; border-left:2px solid var(--brass); padding:3px 0 3px 9px; margin:7px 0}
+.doc-item{padding:7px 0; border-top:1px solid rgba(255,255,255,.05)}
+.doc-item .ln{display:flex; gap:7px; align-items:baseline}
+.doc-item .num{font-family:var(--mono); font-size:10px; color:var(--brass); min-width:24px; text-align:right}
+.doc-item .tx{flex:1; font-size:12.5px; line-height:1.5; color:var(--board-ink)}
+.doc-item.jesus .tx, .doc-item.jesus .num{color:#e2a3a0}
+.doc-refs{display:flex; flex-wrap:wrap; gap:4px; margin:5px 0 0 31px}
+.doc-dbadge{font-size:9px; background:rgba(255,255,255,.08); color:var(--board-soft); border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
 .ref-all{font-size:10.5px; color:var(--brass); background:transparent; border:1px solid var(--brass); border-radius:5px; padding:2px 7px; cursor:pointer; font-weight:600}
 .ref-all:hover{background:var(--brass); color:var(--board)}
 /* Cuadro de citas (modal, fondo claro) */
@@ -485,6 +508,7 @@ body.night .v.hl-lilac{background:rgba(211,193,232,.22)}
       <button class="tab" data-tab="aps">Apartados</button>
       <button class="tab" data-tab="ana">Análisis</button>
       <button class="tab" data-tab="ley">Ley</button>
+      <button class="tab" data-tab="doc">Doctrinas</button>
       <button class="tab" data-tab="ver">Biblias</button>
     </div>
 
@@ -573,6 +597,18 @@ body.night .v.hl-lilac{background:rgba(211,193,232,.22)}
         <input type="text" id="leyFilter" placeholder="Filtrar mandamiento o palabra…">
       </div>
       <div id="leyBody"><p class="empty">Cargando…</p></div>
+    </div>
+
+    <!-- Doctrinas -->
+    <div class="panel" id="panel-doc">
+      <div class="ley-intro">
+        <div class="ley-title">Doctrinas Bíblicas</div>
+        <div class="ley-sub">Estudio y defensa, con sus versículos. Toca una <b>cita</b> para abrirla en el lector.</div>
+      </div>
+      <div class="field">
+        <input type="text" id="docFilter" placeholder="Filtrar doctrina, texto o cita…">
+      </div>
+      <div id="docBody"><p class="empty">Cargando…</p></div>
     </div>
 
     <!-- Biblias -->
@@ -1444,6 +1480,90 @@ function openLeyRefs(n){
   });
 }
 
+/* ======================= Doctrinas ======================= */
+var DOC=null, DOC_LOADING=null, DOC_ITEMS=[];
+function loadDoc(){
+  if(DOC)return Promise.resolve(DOC);
+  if(DOC_LOADING)return DOC_LOADING;
+  DOC_LOADING=fetchFirstJson(['data/doctrinas.json','doctrinas.json']).then(function(d){DOC=d;return d;});
+  return DOC_LOADING;
+}
+function openDoc(){
+  var host=$('#docBody');
+  loadDoc().then(function(d){ renderDoc(d, $('#docFilter').value.trim()); })
+    .catch(function(){ if(host)host.innerHTML='<p class="empty">No se pudo cargar las Doctrinas (data/doctrinas.json).</p>'; });
+}
+function docMatch(doc, f){
+  if(doc.title && normalize(doc.title).indexOf(f)>=0) return true;
+  for(var i=0;i<doc.blocks.length;i++){var b=doc.blocks[i];
+    if(b.x && normalize(b.x).indexOf(f)>=0) return true;
+    if(b.refs){for(var j=0;j<b.refs.length;j++)if(normalize(b.refs[j].t).indexOf(f)>=0)return true;}
+  }
+  return false;
+}
+function renderDoc(d, filter){
+  var host=$('#docBody'); if(!host)return;
+  var f=filter?normalize(filter):'';
+  DOC_ITEMS=[]; var html=''; var shown=0;
+  d.doctrines.forEach(function(doc,di){
+    if(f && !docMatch(doc,f)) return;
+    shown++;
+    var open = f ? true : false;
+    html+='<div class="doc-sec'+(open?' open':'')+'">'+
+      '<div class="doc-sec-h"><span class="cx">'+escAttr(doc.id)+'</span>'+
+        '<span class="tt">'+escAttr(doc.title)+'</span><span class="ar">▸</span></div>'+
+      '<div class="doc-body">';
+    doc.blocks.forEach(function(b){
+      if(b.t==='h2') html+='<div class="doc-h2">'+escAttr(b.x)+'</div>';
+      else if(b.t==='h3') html+='<div class="doc-h3">'+escAttr(b.x)+'</div>';
+      else if(b.t==='p') html+='<div class="doc-p">'+escAttr(b.x)+'</div>';
+      else if(b.t==='quote') html+='<div class="doc-quote">'+escAttr(b.x)+'</div>';
+      else if(b.t==='item'){
+        var idx=DOC_ITEMS.length; DOC_ITEMS.push({x:b.x,jesus:b.jesus,refs:b.refs||[]});
+        html+='<div class="doc-item'+(b.jesus?' jesus':'')+'">'+
+          '<div class="ln"><span class="num">'+b.n+'.</span>'+
+          '<span class="tx">'+escAttr(b.x)+(b.deb?'<span class="doc-dbadge">debatido</span>':'')+'</span></div>';
+        if(b.refs&&b.refs.length){
+          html+='<div class="doc-refs">'+
+            b.refs.map(function(r){return '<button class="ref-chip" data-b="'+r.b+'" data-c="'+r.c+'" data-v="'+r.v+'">'+escAttr(r.t)+'</button>';}).join('')+
+            '<button class="ref-all" data-ri="'+idx+'" title="Leer todas las citas con su texto">◇ Ver todas</button>'+
+          '</div>';
+        }
+        html+='</div>';
+      }
+    });
+    html+='</div></div>';
+  });
+  if(!shown)html='<p class="empty">Sin resultados para «'+escAttr(filter)+'».</p>';
+  host.innerHTML=html;
+  $all('.doc-sec-h',host).forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle('open');};});
+  $all('.doc-refs .ref-chip',host).forEach(function(b){b.onclick=function(){
+    goToRef(+b.getAttribute('data-b'), +b.getAttribute('data-c'), +b.getAttribute('data-v'));
+  };});
+  $all('.doc-refs .ref-all',host).forEach(function(b){b.onclick=function(){ openDocRefs(+b.getAttribute('data-ri')); };});
+}
+function openDocRefs(ri){
+  var it=DOC_ITEMS[ri]; if(!it)return;
+  if(!VER[PRIMARY]||!VER[PRIMARY].bimap){ toast('Carga una versión primero'); return; }
+  var html='<div class="leyref-top'+(it.jesus?' jesus':'')+'">'+escAttr(it.x)+'</div>';
+  it.refs.forEach(function(r){
+    var pares=expandRef(r);
+    html+='<div class="leyref-group"><div class="leyref-h" data-b="'+r.b+'" data-c="'+pares[0].c+'" data-v="'+pares[0].v+'">'+escAttr(r.t)+'</div>';
+    var any=false;
+    pares.forEach(function(p){
+      var raw=getVerseRaw(PRIMARY,r.b,p.c,p.v); if(raw==null)return; any=true;
+      html+='<div class="leyref-v" data-b="'+r.b+'" data-c="'+p.c+'" data-v="'+p.v+'"><span class="rvn">'+p.c+':'+p.v+'</span> '+escAttr(RTF.plain(raw))+'</div>';
+    });
+    if(!any) html+='<div class="leyref-na">No está en la versión activa.</div>';
+    html+='</div>';
+  });
+  openModal('Citas', html, null, function(){
+    $all('.leyref-v, .leyref-h', $('#modal')).forEach(function(el){ el.style.cursor='pointer';
+      el.onclick=function(){ closeModal(); goToRef(+el.getAttribute('data-b'), +el.getAttribute('data-c'), +el.getAttribute('data-v')); };
+    });
+  });
+}
+
 /* ======================= Strong: léxico + morfología + cuadro ======================= */
 var STRONGS=null, STRONGS_LOADING=null;
 function loadStrongs(){
@@ -1812,6 +1932,7 @@ function switchTab(name){
   $all('.panel').forEach(function(p){p.classList.toggle('on',p.id==='panel-'+name);});
   if(window.innerWidth<=860)document.body.classList.remove('nav-closed');
   if(name==='ley' && !LEY) openLey();
+  if(name==='doc' && !DOC) openDoc();
 }
 
 /* ======================= Eventos globales ======================= */
@@ -1850,6 +1971,7 @@ function wireEvents(){
   // Análisis
   $('#doAna').onclick=function(){runAnalysis($('#anaTerm').value,$('#anaWord').checked);};
   $('#leyFilter').addEventListener('input',function(){ if(LEY)renderLey(LEY,this.value.trim()); });
+  $('#docFilter').addEventListener('input',function(){ if(DOC)renderDoc(DOC,this.value.trim()); });
   $('#anaTerm').addEventListener('keydown',function(e){if(e.key==='Enter')$('#doAna').click();});
 
   // Apartados
