@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 760" font-family="Georgia, serif">
+<rect width="1480" height="760" fill="#F4F1E8"/>
+<rect x="0" y="0" width="1480" height="64" fill="#15302E"/>
+<text x="740.0" y="42" fill="#F4F1E8" font-size="30" font-weight="bold" text-anchor="middle">Las 7 Dispensaciones</text>
+<rect x="50.0" y="150" width="183.4" height="360" rx="10" fill="#1C3B38"/>
+<text x="141.7" y="194" fill="#F4F1E8" font-size="17" font-weight="bold" text-anchor="middle">1</text>
+<text x="141.7" y="220" fill="#F4F1E8" font-size="15" font-weight="bold" text-anchor="middle">INOCENCIA</text>
+<text x="141.7" y="450" fill="#F4F1E8" font-size="14" text-anchor="middle" opacity="0.9">Edén</text>
+<text x="141.7" y="476" fill="#F4F1E8" font-size="13" text-anchor="middle" opacity="0.75">Gn 1–3</text>
+<rect x="249.4" y="150" width="183.4" height="360" rx="10" fill="#3a5a40"/>
+<text x="341.1" y="194" fill="#F4F1E8" font-size="17" font-weight="bold" text-anchor="middle">2</text>
+<text x="341.1" y="220" fill="#F4F1E8" font-size="15" font-weight="bold" text-anchor="middle">CONCIENCIA</text>
+<text x="341.1" y="450" fill="#F4F1E8" font-size="14" text-anchor="middle" opacity="0.9">hasta el Diluvio</text>
+<text x="341.1" y="476" fill="#F4F1E8" font-size="13" text-anchor="middle" opacity="0.75">Gn 4–8</text>
+<rect x="448.9" y="150" width="183.4" height="360" rx="10" fill="#6b7a3a"/>
+<text x="540.6" y="194" fill="#F4F1E8" font-size="17" font-weight="bold" text-anchor="middle">3</text>
+<text x="540.6" y="220" fill="#F4F1E8" font-size="15" font-weight="bold" text-anchor="middle">GOBIERNO HUMANO</text>
+<text x="540.6" y="450" fill="#F4F1E8" font-size="14" text-anchor="middle" opacity="0.9">Babel</text>
+<text x="540.6" y="476" fill="#F4F1E8" font-size="13" text-anchor="middle" opacity="0.75">Gn 9–11</text>
+<rect x="648.3" y="150" width="183.4" height="360" rx="10" fill="#B5893C"/>
+<text x="740.0" y="194" fill="#F4F1E8" font-size="17" font-weight="bold" text-anchor="middle">4</text>
+<text x="740.0" y="220" fill="#F4F1E8" font-size="15" font-weight="bold" text-anchor="middle">PROMESA</text>
+<text x="740.0" y="450" fill="#F4F1E8" font-size="14" text-anchor="middle" opacity="0.9">Abraham</text>
+<text x="740.0" y="476" fill="#F4F1E8" font-size="13" text-anchor="middle" opacity="0.75">Gn 12–Éx 19</text>
+<rect x="847.7" y="150" width="183.4" height="360" rx="10" fill="#A5342B"/>
+<text x="939.4" y="194" fill="#F4F1E8" font-size="17" font-weight="bold" text-anchor="middle">5</text>
+<text x="939.4" y="220" fill="#F4F1E8" font-size="15" font-weight="bold" text-anchor="middle">LEY</text>
+<text x="939.4" y="450" fill="#F4F1E8" font-size="14" text-anchor="middle" opacity="0.9">Moisés</text>
+<text x="939.4" y="476" fill="#F4F1E8" font-size="13" text-anchor="middle" opacity="0.75">Éx 20–Hch 1</text>
+<rect x="1047.1" y="150" width="183.4" height="360" rx="10" fill="#3d6ea5"/>
+<text x="1138.9" y="194" fill="#F4F1E8" font-size="17" font-weight="bold" text-anchor="middle">6</text>
+<text x="1138.9" y="220" fill="#F4F1E8" font-size="15" font-weight="bold" text-anchor="middle">GRACIA</text>
+<text x="1138.9" y="450" fill="#F4F1E8" font-size="14" text-anchor="middle" opacity="0.9">la Iglesia (hoy)</text>
+<text x="1138.9" y="476" fill="#F4F1E8" font-size="13" text-anchor="middle" opacity="0.75">Hch 2–Ap 3</text>
+<rect x="1246.6" y="150" width="183.4" height="360" rx="10" fill="#15302E"/>
+<text x="1338.3" y="194" fill="#F4F1E8" font-size="17" font-weight="bold" text-anchor="middle">7</text>
+<text x="1338.3" y="220" fill="#F4F1E8" font-size="15" font-weight="bold" text-anchor="middle">REINO</text>
+<text x="1338.3" y="450" fill="#F4F1E8" font-size="14" text-anchor="middle" opacity="0.9">Milenio</text>
+<text x="1338.3" y="476" fill="#F4F1E8" font-size="13" text-anchor="middle" opacity="0.75">Ap 20</text>
+<line x1="40" y1="550" x2="1440" y2="550" stroke="#B5893C" stroke-width="2"/>
+<polygon points="1440,550 1422,544 1422,556" fill="#B5893C"/>
+<text x="740.0" y="720" fill="#8a7a52" font-size="14" text-anchor="middle" font-style="italic">Esquema dispensacional. La división exacta de las dispensaciones varía entre autores.</text>
+<text x="740.0" y="744" fill="#B5893C" font-size="13" text-anchor="middle">Escudriñad</text>
+</svg>

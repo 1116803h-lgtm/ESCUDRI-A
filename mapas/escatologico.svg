@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 760" font-family="Georgia, serif">
+<rect width="1480" height="760" fill="#F4F1E8"/>
+<rect x="0" y="0" width="1480" height="64" fill="#15302E"/>
+<text x="740.0" y="42" fill="#F4F1E8" font-size="30" font-weight="bold" text-anchor="middle">Línea del tiempo profético</text>
+<rect x="60" y="230" width="300" height="120" rx="10" fill="#1C3B38"/>
+<text x="210.0" y="280" fill="#F4F1E8" font-size="22" font-weight="bold" text-anchor="middle">ERA DE LA IGLESIA</text>
+<text x="210.0" y="312" fill="#F4F1E8" font-size="15" text-anchor="middle" opacity="0.85">Pentecostés → hoy</text>
+<rect x="420" y="230" width="300" height="120" rx="10" fill="#A5342B"/>
+<text x="570.0" y="280" fill="#F4F1E8" font-size="22" font-weight="bold" text-anchor="middle">GRAN TRIBULACIÓN</text>
+<text x="570.0" y="312" fill="#F4F1E8" font-size="15" text-anchor="middle" opacity="0.85">7 años (Daniel 9)</text>
+<rect x="820" y="230" width="300" height="120" rx="10" fill="#3d6ea5"/>
+<text x="970.0" y="280" fill="#F4F1E8" font-size="22" font-weight="bold" text-anchor="middle">MILENIO</text>
+<text x="970.0" y="312" fill="#F4F1E8" font-size="15" text-anchor="middle" opacity="0.85">Reino de 1000 años</text>
+<rect x="1180" y="230" width="240" height="120" rx="10" fill="#15302E"/>
+<text x="1300.0" y="280" fill="#F4F1E8" font-size="22" font-weight="bold" text-anchor="middle">ETERNIDAD</text>
+<text x="1300.0" y="312" fill="#F4F1E8" font-size="15" text-anchor="middle" opacity="0.85">Cielo nuevo / tierra nueva</text>
+<polygon points="420.0,264.0 426.9,280.5 444.7,282.0 431.1,293.6 435.3,311.0 420.0,301.7 404.7,311.0 408.9,293.6 395.3,282.0 413.1,280.5" fill="#B5893C" stroke="#15302E" stroke-width="1.5"/>
+<text x="420" y="212" fill="#22262C" font-size="16" font-weight="bold" text-anchor="middle">ARREBATAMIENTO</text>
+<text x="420" y="384" fill="#8a7a52" font-size="13" text-anchor="middle">1 Ts 4:16-17</text>
+<polygon points="820.0,264.0 826.9,280.5 844.7,282.0 831.1,293.6 835.3,311.0 820.0,301.7 804.7,311.0 808.9,293.6 795.3,282.0 813.1,280.5" fill="#B5893C" stroke="#15302E" stroke-width="1.5"/>
+<text x="820" y="212" fill="#22262C" font-size="16" font-weight="bold" text-anchor="middle">2ª VENIDA · ARMAGEDÓN</text>
+<text x="820" y="384" fill="#8a7a52" font-size="13" text-anchor="middle">Ap 19:11-21</text>
+<polygon points="1180.0,264.0 1186.9,280.5 1204.7,282.0 1191.1,293.6 1195.3,311.0 1180.0,301.7 1164.7,311.0 1168.9,293.6 1155.3,282.0 1173.1,280.5" fill="#B5893C" stroke="#15302E" stroke-width="1.5"/>
+<text x="1180" y="212" fill="#22262C" font-size="16" font-weight="bold" text-anchor="middle">JUICIO FINAL</text>
+<text x="1180" y="384" fill="#8a7a52" font-size="13" text-anchor="middle">Gran Trono Blanco · Ap 20:11</text>
+<line x1="40" y1="440" x2="1440" y2="440" stroke="#B5893C" stroke-width="2"/>
+<polygon points="1440,440 1422,434 1422,446" fill="#B5893C"/>
+<text x="1420" y="462" fill="#8a7a52" font-size="13" text-anchor="end">el tiempo →</text>
+<rect x="420" y="120" width="300" height="70" rx="8" fill="#FBF9F3" stroke="#B5893C" stroke-width="1.5"/>
+<text x="570" y="150" fill="#22262C" font-size="15" font-weight="bold" text-anchor="middle">En el cielo:</text>
+<text x="570" y="174" fill="#22262C" font-size="14" text-anchor="middle">Bodas del Cordero (Ap 19:7-9)</text>
+<line x1="570" y1="190" x2="500" y2="230" stroke="#B5893C" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="740.0" y="700" fill="#8a7a52" font-size="14" text-anchor="middle" font-style="italic">Esquema pretribulacional · premilenial. El momento del arrebatamiento es tema debatido entre cristianos.</text>
+<text x="740.0" y="728" fill="#B5893C" font-size="13" text-anchor="middle">Escudriñad</text>
+</svg>
