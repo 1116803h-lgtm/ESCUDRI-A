@@ -104,12 +104,29 @@ grande (~15 MB en JSON), por eso conviene **cargarla arrastrando el `.bblx`** en
 
 La app carga las versiones que estén listadas en **`data/versions.json`** (el «manifiesto»):
 
+Catálogo actual (archivo `data/versions.json`):
+
+| Abbr | Versión | Contenido | Strong |
+|------|---------|-----------|--------|
+| RV 1960  | Reina-Valera 1960 | Biblia completa | no |
+| RV1960+  | Reina-Valera 1960 con números Strong | Biblia completa | sí |
+| KJ2000   | King James 2000 (inglés) | Biblia completa | no |
+| Peshitta | Peshitta en español | solo Nuevo Testamento | no |
+| LBLA     | La Biblia de las Américas | Biblia completa | no |
+| Vulgata  | Vulgata Latina | 66 libros canónicos | no |
+| LXX      | Septuaginta al español (Jünemann) | Biblia completa (Salmos incluye el 151) | no |
+
 ```json
 {
   "primary": "RV1960",
   "versions": [
-    { "id": "RV1960",  "name": "Reina-Valera 1960",                   "abbr": "RV 1960", "file": "data/RV1960.json",  "strong": false },
-    { "id": "RV1960S", "name": "Reina-Valera 1960 con números Strong", "abbr": "RV1960+", "file": "data/RV1960S.json", "strong": true }
+    { "id": "RV1960",   "name": "Reina-Valera 1960",                   "abbr": "RV 1960",  "file": "data/RV1960.json",   "strong": false },
+    { "id": "RV1960S",  "name": "Reina-Valera 1960 con números Strong", "abbr": "RV1960+",  "file": "data/RV1960S.json",  "strong": true },
+    { "id": "KJ2000",   "name": "King James 2000",                      "abbr": "KJ2000",   "file": "data/KJ2000.json",   "strong": false },
+    { "id": "Peshitta", "name": "Peshitta en español (NT)",             "abbr": "Peshitta", "file": "data/Peshitta.json", "strong": false },
+    { "id": "LBLA",     "name": "La Biblia de las Américas",            "abbr": "LBLA",     "file": "data/LBLA.json",     "strong": false },
+    { "id": "Vulgata",  "name": "Vulgata Latina",                       "abbr": "Vulgata",  "file": "data/Vulgata.json",  "strong": false },
+    { "id": "LXX",      "name": "Septuaginta al español (Jünemann)",    "abbr": "LXX",      "file": "data/LXX.json",      "strong": false }
   ]
 }
 ```
@@ -117,6 +134,10 @@ La app carga las versiones que estén listadas en **`data/versions.json`** (el �
 - `primary` es la versión que se abre al inicio.
 - Solo la principal se descarga al arrancar; **las demás se cargan cuando las abres**
   (al ponerlas como *Principal* o *Comparar*), para no descargar todo de golpe.
+- El **service worker** guarda en caché cada versión la primera vez que la abres, así que
+  para tenerlas todas disponibles **sin conexión**, ábrelas una vez estando con internet.
+- Versiones que son **solo Nuevo Testamento** (como la Peshitta) o que no tienen cierto
+  libro: la app lo detecta y avisa al navegar a un libro ausente, sin fallar.
 
 ### Añadir una versión nueva
 1. Convierte su módulo: `python3 convertir_bblx.py MiBiblia.bblx data/MiBiblia.json`
@@ -138,7 +159,6 @@ La app carga las versiones que estén listadas en **`data/versions.json`** (el �
 > libres o de dominio público (p. ej. Reina-Valera 1909, RV Gómez). La RV1960 es © Sociedades
 > Bíblicas Unidas.
 
-## Léxico de Strong
 ## Instalar como aplicación (PWA)
 
 La app se puede instalar en el teléfono y abrir **a pantalla completa**, sin la barra

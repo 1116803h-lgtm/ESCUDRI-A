@@ -5,7 +5,7 @@
      primera vez que se usa (cache-first con respaldo de red).
    Así la app funciona sin conexión tras la primera visita, sin
      forzar la descarga de archivos grandes al instalar.               */
-var CACHE = 'escudrinad-v9';
+var CACHE = 'escudrinad-v10';
 var CORE = [
   './',
   'index.html',
@@ -14,12 +14,18 @@ var CORE = [
   'icon-512.png',
   'apple-touch-icon.png',
   'favicon-32.png',
+  'data/versions.json',
   'data/ley_cristo.json',
   'data/doctrinas.json',
   'data/mapas.json',
   'mapas/escatologico.svg',
   'mapas/dispensaciones.svg'
 ];
+// Nota: las versiones de Biblia (RV1960.json, LBLA.json, Vulgata.json, etc.),
+// el léxico Strong y sql.js NO se precargan aquí porque son grandes. Cada una se
+// guarda en caché automáticamente la PRIMERA vez que se abre (cache-first con
+// respaldo de red), así la instalación es ligera y luego quedan disponibles sin
+// conexión. Para tener todas offline, ábrelas una vez estando con internet.
 
 self.addEventListener('install', function (e) {
   e.waitUntil(

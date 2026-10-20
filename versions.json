@@ -1,7 +1,12 @@
 {
   "primary": "RV1960",
   "versions": [
-    { "id": "RV1960",  "name": "Reina-Valera 1960",                         "abbr": "RV 1960", "file": "data/RV1960.json",  "strong": false },
-    { "id": "RV1960S", "name": "Reina-Valera 1960 con números Strong",       "abbr": "RV1960+", "file": "data/RV1960S.json", "strong": true }
+    { "id": "RV1960",   "name": "Reina-Valera 1960",                   "abbr": "RV 1960",  "file": "data/RV1960.json",   "strong": false },
+    { "id": "RV1960S",  "name": "Reina-Valera 1960 con números Strong", "abbr": "RV1960+",  "file": "data/RV1960S.json",  "strong": true },
+    { "id": "KJ2000",   "name": "King James 2000",                      "abbr": "KJ2000",   "file": "data/KJ2000.json",   "strong": false },
+    { "id": "Peshitta", "name": "Peshitta en español (NT)",             "abbr": "Peshitta", "file": "data/Peshitta.json", "strong": false },
+    { "id": "LBLA",     "name": "La Biblia de las Américas",            "abbr": "LBLA",     "file": "data/LBLA.json",     "strong": false },
+    { "id": "Vulgata",  "name": "Vulgata Latina",                       "abbr": "Vulgata",  "file": "data/Vulgata.json",  "strong": false },
+    { "id": "LXX",      "name": "Septuaginta al español (Jünemann)",    "abbr": "LXX",      "file": "data/LXX.json",      "strong": false }
   ]
 }
