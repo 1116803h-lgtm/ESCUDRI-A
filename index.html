@@ -342,6 +342,28 @@ body:not(.showstrong) .strong{display:none}
 .doc-item.jesus .tx, .doc-item.jesus .num{color:#e2a3a0}
 .doc-refs{display:flex; flex-wrap:wrap; gap:4px; margin:5px 0 0 31px}
 .doc-dbadge{font-size:9px; background:rgba(255,255,255,.08); color:var(--board-soft); border-radius:10px; padding:0 6px; margin-left:4px; vertical-align:middle}
+/* ===== Mapas ===== */
+#mapFilter{width:100%}
+.map-cat{font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--brass); margin:14px 0 7px; border-bottom:1px solid rgba(181,137,60,.3); padding-bottom:3px}
+.map-card{display:flex; gap:10px; align-items:center; border:1px solid rgba(255,255,255,.08); border-radius:9px; padding:9px; margin-bottom:8px; background:rgba(255,255,255,.02); cursor:pointer; transition:border-color .12s}
+.map-card:hover{border-color:var(--brass)}
+.map-thumb{width:64px; height:48px; flex:0 0 64px; border-radius:6px; background:var(--paper-2); overflow:hidden; display:flex; align-items:center; justify-content:center; border:1px solid var(--line)}
+.map-thumb img{width:100%; height:100%; object-fit:cover}
+.map-info{flex:1; min-width:0}
+.map-name{font-size:13px; font-weight:600; color:var(--board-ink); line-height:1.3}
+.map-desc{font-size:11.5px; color:var(--board-soft); margin-top:2px; line-height:1.35}
+.map-empty{font-size:12px; color:var(--board-soft); font-style:italic; padding:4px 2px}
+/* Visor */
+#mapViewer{position:fixed; inset:0; z-index:200; background:#0c1413; display:none; flex-direction:column; touch-action:none}
+#mapViewer.on{display:flex}
+#mvBar{display:flex; align-items:center; gap:10px; padding:calc(8px + env(safe-area-inset-top,0px)) 14px 8px; background:var(--board-2); color:var(--board-ink); border-bottom:1px solid rgba(0,0,0,.4)}
+#mvTitle{flex:1; font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+#mvTools{display:flex; gap:6px}
+#mvTools button{width:38px; height:34px; border-radius:8px; border:1px solid var(--line-2); background:var(--board); color:var(--brass); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center}
+#mvTools button:hover{background:var(--brass); color:var(--board)}
+#mvStage{flex:1; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#0c1413; cursor:grab}
+#mvStage.drag{cursor:grabbing}
+#mvImg{max-width:100%; max-height:100%; transform-origin:center center; user-select:none; -webkit-user-drag:none; will-change:transform}
 .ref-all{font-size:10.5px; color:var(--brass); background:transparent; border:1px solid var(--brass); border-radius:5px; padding:2px 7px; cursor:pointer; font-weight:600}
 .ref-all:hover{background:var(--brass); color:var(--board)}
 /* Cuadro de citas (modal, fondo claro) */
@@ -509,6 +531,7 @@ body.night .v.hl-lilac{background:rgba(211,193,232,.22)}
       <button class="tab" data-tab="ana">Análisis</button>
       <button class="tab" data-tab="ley">Ley</button>
       <button class="tab" data-tab="doc">Doctrinas</button>
+      <button class="tab" data-tab="map">Mapas</button>
       <button class="tab" data-tab="ver">Biblias</button>
     </div>
 
@@ -611,6 +634,18 @@ body.night .v.hl-lilac{background:rgba(211,193,232,.22)}
       <div id="docBody"><p class="empty">Cargando…</p></div>
     </div>
 
+    <!-- Mapas -->
+    <div class="panel" id="panel-map">
+      <div class="ley-intro">
+        <div class="ley-title">Mapas y esquemas</div>
+        <div class="ley-sub">Toca un mapa para abrirlo a pantalla completa (zoom y desplazamiento).</div>
+      </div>
+      <div class="field">
+        <input type="text" id="mapFilter" placeholder="Filtrar mapa…">
+      </div>
+      <div id="mapBody"><p class="empty">Cargando…</p></div>
+    </div>
+
     <!-- Biblias -->
     <div class="panel" id="panel-ver">
       <h4>Versiones cargadas</h4>
@@ -670,6 +705,20 @@ body.night .v.hl-lilac{background:rgba(211,193,232,.22)}
 <!-- Modales -->
 <div class="modal-bg" id="modalBg">
   <div class="modal" id="modal"></div>
+</div>
+
+<!-- Visor de mapas a pantalla completa -->
+<div id="mapViewer">
+  <div id="mvBar">
+    <span id="mvTitle"></span>
+    <div id="mvTools">
+      <button id="mvOut" title="Alejar">−</button>
+      <button id="mvReset" title="Restablecer">⟳</button>
+      <button id="mvIn" title="Acercar">+</button>
+      <button id="mvClose" title="Cerrar">✕</button>
+    </div>
+  </div>
+  <div id="mvStage"><img id="mvImg" alt="" draggable="false"></div>
 </div>
 
 <div id="toast"></div>
@@ -1564,6 +1613,98 @@ function openDocRefs(ri){
   });
 }
 
+/* ======================= Mapas ======================= */
+var MAPS=null, MAPS_LOADING=null;
+function loadMaps(){
+  if(MAPS)return Promise.resolve(MAPS);
+  if(MAPS_LOADING)return MAPS_LOADING;
+  MAPS_LOADING=fetchFirstJson(['data/mapas.json','mapas.json']).then(function(d){MAPS=d;return d;});
+  return MAPS_LOADING;
+}
+function openMaps(){
+  var host=$('#mapBody');
+  loadMaps().then(function(d){ renderMaps(d, $('#mapFilter').value.trim()); })
+    .catch(function(){ if(host)host.innerHTML='<p class="empty">No se pudo cargar los mapas (data/mapas.json).</p>'; });
+}
+function mapCandidates(file){
+  var bn=file.replace(/^.*\//,''); var arr=[file];
+  if(bn!==file)arr.push(bn);
+  if(arr.indexOf('mapas/'+bn)<0)arr.push('mapas/'+bn);
+  return arr.filter(function(x,i,a){return a.indexOf(x)===i;});
+}
+function renderMaps(d, filter){
+  var host=$('#mapBody'); if(!host)return;
+  var f=filter?normalize(filter):'';
+  var html=''; var shown=0;
+  (d.categories||[]).forEach(function(cat){
+    var maps=(cat.maps||[]).filter(function(m){ return !f || normalize(m.title+' '+(m.desc||'')).indexOf(f)>=0; });
+    html+='<div class="map-cat">'+escAttr(cat.name)+'</div>';
+    if(!maps.length){ html+='<div class="map-empty">'+(f?'(sin coincidencias)':'(aún no hay mapas en esta categoría)')+'</div>'; return; }
+    maps.forEach(function(m){ shown++;
+      var cands=mapCandidates(m.file);
+      html+='<div class="map-card" data-file="'+escAttr(cands.join('|'))+'" data-title="'+escAttr(m.title)+'">'+
+        '<div class="map-thumb"><img loading="lazy" src="'+escAttr(cands[0])+'" alt="" onerror="this.style.display=\'none\'"></div>'+
+        '<div class="map-info"><div class="map-name">'+escAttr(m.title)+'</div>'+
+        (m.desc?'<div class="map-desc">'+escAttr(m.desc)+'</div>':'')+'</div></div>';
+    });
+  });
+  host.innerHTML=html;
+  $all('.map-card',host).forEach(function(c){c.onclick=function(){
+    openMapViewer(c.getAttribute('data-file').split('|'), c.getAttribute('data-title'));
+  };});
+}
+
+/* ---- Visor con zoom / desplazamiento ---- */
+var MV={scale:1,tx:0,ty:0,drag:false,sx:0,sy:0,px:0,py:0,pinch:0,pinchScale:1};
+function mvApply(){ var img=$('#mvImg'); if(img)img.style.transform='translate('+MV.tx+'px,'+MV.ty+'px) scale('+MV.scale+')'; }
+function mvReset(){ MV.scale=1; MV.tx=0; MV.ty=0; mvApply(); }
+function mvZoom(f, cx, cy){
+  var st=$('#mvStage'); var r=st.getBoundingClientRect();
+  if(cx===undefined){cx=r.width/2; cy=r.height/2;}
+  var ns=Math.min(8, Math.max(1, MV.scale*f));
+  var k=ns/MV.scale;
+  // mantener el punto (cx,cy) fijo respecto al centro
+  var ox=cx-r.width/2, oy=cy-r.height/2;
+  MV.tx=ox-(ox-MV.tx)*k; MV.ty=oy-(oy-MV.ty)*k;
+  MV.scale=ns;
+  if(MV.scale<=1){MV.tx=0;MV.ty=0;}
+  mvApply();
+}
+function openMapViewer(cands, title){
+  var v=$('#mapViewer'), img=$('#mvImg');
+  $('#mvTitle').textContent=title||'';
+  mvReset();
+  // cargar con respaldo de rutas
+  var i=0;
+  img.onerror=function(){ i++; if(i<cands.length)img.src=cands[i]; };
+  img.onload=function(){ mvReset(); };
+  img.src=cands[0];
+  v.classList.add('on');
+}
+function closeMapViewer(){ $('#mapViewer').classList.remove('on'); $('#mvImg').src=''; }
+function wireMapViewer(){
+  var st=$('#mvStage'), v=$('#mapViewer');
+  $('#mvClose').onclick=closeMapViewer;
+  $('#mvIn').onclick=function(){mvZoom(1.3);};
+  $('#mvOut').onclick=function(){mvZoom(1/1.3);};
+  $('#mvReset').onclick=mvReset;
+  st.addEventListener('wheel',function(e){e.preventDefault(); var r=st.getBoundingClientRect();
+    mvZoom(e.deltaY<0?1.12:1/1.12, e.clientX-r.left, e.clientY-r.top);},{passive:false});
+  st.addEventListener('dblclick',function(e){ if(MV.scale>1)mvReset(); else {var r=st.getBoundingClientRect(); mvZoom(2.5, e.clientX-r.left, e.clientY-r.top);} });
+  // arrastre (ratón / 1 dedo)
+  st.addEventListener('pointerdown',function(e){ if(MV.pinch)return; MV.drag=true; st.classList.add('drag'); MV.sx=e.clientX; MV.sy=e.clientY; MV.px=MV.tx; MV.py=MV.ty; st.setPointerCapture&&st.setPointerCapture(e.pointerId); });
+  st.addEventListener('pointermove',function(e){ if(!MV.drag||MV.pinch)return; MV.tx=MV.px+(e.clientX-MV.sx); MV.ty=MV.py+(e.clientY-MV.sy); mvApply(); });
+  function endDrag(){ MV.drag=false; st.classList.remove('drag'); }
+  st.addEventListener('pointerup',endDrag); st.addEventListener('pointercancel',endDrag);
+  // pellizco (2 dedos)
+  st.addEventListener('touchstart',function(e){ if(e.touches.length===2){ MV.drag=false; MV.pinch=dist(e.touches); MV.pinchScale=MV.scale; } },{passive:false});
+  st.addEventListener('touchmove',function(e){ if(e.touches.length===2 && MV.pinch){ e.preventDefault();
+    var nd=dist(e.touches); MV.scale=Math.min(8,Math.max(1, MV.pinchScale*(nd/MV.pinch))); if(MV.scale<=1){MV.tx=0;MV.ty=0;} mvApply(); } },{passive:false});
+  st.addEventListener('touchend',function(e){ if(e.touches.length<2)MV.pinch=0; });
+  document.addEventListener('keydown',function(e){ if($('#mapViewer').classList.contains('on')&&e.key==='Escape')closeMapViewer(); });
+}
+function dist(t){ var dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY; return Math.sqrt(dx*dx+dy*dy); }
+
 /* ======================= Strong: léxico + morfología + cuadro ======================= */
 var STRONGS=null, STRONGS_LOADING=null;
 function loadStrongs(){
@@ -1933,6 +2074,7 @@ function switchTab(name){
   if(window.innerWidth<=860)document.body.classList.remove('nav-closed');
   if(name==='ley' && !LEY) openLey();
   if(name==='doc' && !DOC) openDoc();
+  if(name==='map' && !MAPS) openMaps();
 }
 
 /* ======================= Eventos globales ======================= */
@@ -1972,6 +2114,8 @@ function wireEvents(){
   $('#doAna').onclick=function(){runAnalysis($('#anaTerm').value,$('#anaWord').checked);};
   $('#leyFilter').addEventListener('input',function(){ if(LEY)renderLey(LEY,this.value.trim()); });
   $('#docFilter').addEventListener('input',function(){ if(DOC)renderDoc(DOC,this.value.trim()); });
+  $('#mapFilter').addEventListener('input',function(){ if(MAPS)renderMaps(MAPS,this.value.trim()); });
+  wireMapViewer();
   $('#anaTerm').addEventListener('keydown',function(e){if(e.key==='Enter')$('#doAna').click();});
 
   // Apartados

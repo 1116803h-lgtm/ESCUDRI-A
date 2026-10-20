@@ -1,0 +1,16 @@
+{
+  "title": "Mapas y esquemas",
+  "categories": [
+    {
+      "name": "Esquemas doctrinales",
+      "maps": [
+        { "id": "escatologico",   "title": "Línea del tiempo profético", "file": "mapas/escatologico.svg",   "desc": "Esquema pretribulacional y premilenial (ver Doctrina 10)." },
+        { "id": "dispensaciones", "title": "Las 7 Dispensaciones",         "file": "mapas/dispensaciones.svg", "desc": "De Edén al Milenio." }
+      ]
+    },
+    {
+      "name": "Geografía bíblica",
+      "maps": []
+    }
+  ]
+}

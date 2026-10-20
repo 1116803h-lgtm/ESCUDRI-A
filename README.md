@@ -158,3 +158,27 @@ agregarlo** para que tome la configuración de pantalla completa y el ícono nue
 
 Los íconos se generan con `make_icon.py` (requiere Pillow); ejecútalo si quieres
 regenerarlos o cambiar el diseño.
+
+## Mapas y esquemas (pestaña "Mapas")
+
+La pestaña **Mapas** lista los mapas desde `data/mapas.json`, agrupados por categoría.
+Al tocar uno se abre a **pantalla completa** con **zoom y desplazamiento** (pellizco en el
+teléfono; rueda o doble clic y arrastre en PC).
+
+### Agregar un mapa nuevo
+1. Sube la imagen a la carpeta **`mapas/`** del repositorio. Formatos: **SVG** (recomendado:
+   nítido a cualquier zoom), PNG o JPG.
+2. Regístralo en `data/mapas.json`, dentro de la categoría que quieras:
+   ```json
+   { "id": "pablo1", "title": "Primer viaje de Pablo", "file": "mapas/pablo1.png", "desc": "Hechos 13–14" }
+   ```
+3. Sube ambos cambios a GitHub. Ya aparece en la lista.
+
+> **Derechos de autor:** como el repositorio es público, usa mapas **de dominio público,
+> con licencia libre, o de tu propia creación**. Muchos mapas bíblicos que circulan tienen
+> copyright y no deben publicarse abiertamente.
+
+**Fuentes de mapas libres** (verifica siempre la licencia de cada archivo):
+Wikimedia Commons (busca "Paul's missionary journeys", "Assyrian Empire map", etc.),
+mapas de dominio público antiguos, o créalos tú mismo. Se incluyen ya dos esquemas propios:
+la **línea del tiempo profético** y las **7 dispensaciones**.
